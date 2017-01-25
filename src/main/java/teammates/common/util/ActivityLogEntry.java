@@ -14,9 +14,6 @@ import teammates.common.datatransfer.UserType;
 import teammates.common.exception.TeammatesException;
 
 import com.google.appengine.api.log.AppLogLine;
-import com.google.appengine.api.users.User;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
 
 /** A log entry to describe an action carried out by the app */
 public class ActivityLogEntry {
@@ -41,8 +38,6 @@ public class ActivityLogEntry {
     private static final int TIME_TAKEN_DANGER_UPPER_RANGE = 60000;
     
     private static final Logger log = Logger.getLogger();
-
-    private static UserService userService = UserServiceFactory.getUserService();
     
     private long time;
     private String servletName;
@@ -122,7 +117,7 @@ public class ActivityLogEntry {
      * will be used to construct the id.
      */
     public ActivityLogEntry(String servlet, String act, AccountAttributes acc, String params, String link,
-                            String unregisteredUserCourse, String unregisteredUserEmail) {
+                            String unregisteredUserCourse, String unregisteredUserEmail,UserType userType) {
         time = System.currentTimeMillis();
         servletName = servlet;
         action = act;
@@ -135,9 +130,7 @@ public class ActivityLogEntry {
             name = "Unknown";
             email = "Unknown";
             
-	    User user = getCurrentGoogleUser();
-           
-            googleId = user == null ? "Unknown" : user.getNickname();
+            googleId = userType == null ? "Unknown" : userType.id;
         
         } else {
             role = acc.isInstructor ? "Instructor" : "Student";
@@ -634,10 +627,6 @@ public class ActivityLogEntry {
     public boolean isTestingData() {
         return email.endsWith(".tmt");
 
-    }
-
-    private User getCurrentGoogleUser() {
-        return userService.getCurrentUser();
     }
 
 }
