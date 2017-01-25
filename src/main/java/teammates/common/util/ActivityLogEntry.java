@@ -50,6 +50,7 @@ public class ActivityLogEntry {
     private String message;
     private String url;
     private Long timeTaken;
+    private static UserType userType;
     
     // id can be in the form of <googleId>%<time> e.g. bamboo3250%20151103170618465
     // or <studentemail>%<courseId>%<time> (for unregistered students)
@@ -107,7 +108,7 @@ public class ActivityLogEntry {
      * Used in the various servlets in the application
      */
     public ActivityLogEntry(String servlet, String act, AccountAttributes acc, String params, String link) {
-        this(servlet, act, acc, params, link, null, null);
+        this(servlet, act, acc, params, link, null, null, null);
     }
 
     /**
@@ -129,7 +130,6 @@ public class ActivityLogEntry {
             role = "Unknown";
             name = "Unknown";
             email = "Unknown";
-            
             googleId = userType == null ? "Unknown" : userType.id;
         
         } else {
@@ -504,7 +504,7 @@ public class ActivityLogEntry {
         String courseId = HttpRequestHelper.getValueFromRequestParameterMap(req, Const.ParamsNames.COURSE_ID);
         String studentEmail = HttpRequestHelper.getValueFromRequestParameterMap(req, Const.ParamsNames.STUDENT_EMAIL);
         ActivityLogEntry exceptionLog = new ActivityLogEntry(action, Const.ACTION_RESULT_FAILURE, null, message,
-                                                             url, courseId, studentEmail);
+                                                             url, courseId, studentEmail, userType);
         
         return exceptionLog.generateLogMessage();
     }
@@ -538,7 +538,7 @@ public class ActivityLogEntry {
         String studentEmail = HttpRequestHelper.getValueFromRequestParameterMap(req, Const.ParamsNames.STUDENT_EMAIL);
         
         ActivityLogEntry emailReportLog = new ActivityLogEntry(action, Const.ACTION_RESULT_SYSTEM_ERROR_REPORT, null,
-                                                               message, url, courseId, studentEmail);
+                                                               message, url, courseId, studentEmail, userType);
         
         return emailReportLog.generateLogMessage();
     }
