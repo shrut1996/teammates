@@ -3,33 +3,27 @@ package teammates.test.cases.action;
 import java.util.Arrays;
 
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import teammates.common.datatransfer.DataBundle;
 import teammates.common.datatransfer.FeedbackParticipantType;
-import teammates.common.datatransfer.FeedbackSessionAttributes;
-import teammates.common.datatransfer.InstructorAttributes;
+import teammates.common.datatransfer.attributes.FeedbackSessionAttributes;
+import teammates.common.datatransfer.attributes.InstructorAttributes;
 import teammates.common.util.Const;
 import teammates.common.util.FieldValidator;
 import teammates.logic.core.FeedbackSessionsLogic;
 import teammates.test.driver.AssertHelper;
-import teammates.ui.controller.Action;
 import teammates.ui.controller.InstructorFeedbackQuestionAddAction;
 import teammates.ui.controller.RedirectResult;
 
 public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
-    private static final DataBundle dataBundle = getTypicalDataBundle();
 
-    @BeforeClass
-    public void classSetup() {
-        printTestClassHeader();
-        removeAndRestoreTypicalDataBundle();
-        uri = Const.ActionURIs.INSTRUCTOR_FEEDBACK_QUESTION_ADD;
+    @Override
+    protected String getActionUri() {
+        return Const.ActionURIs.INSTRUCTOR_FEEDBACK_QUESTION_ADD;
     }
 
     @AfterClass
-    public static void classTearDown() {
+    public void classTearDown() {
         // delete entire session to clean the database
         FeedbackSessionAttributes fs = dataBundle.feedbackSessions.get("session1InCourse1");
         FeedbackSessionsLogic.inst().deleteFeedbackSessionCascade(fs.getFeedbackSessionName(), fs.getCourseId());
@@ -44,7 +38,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         ______TS("Typical case");
 
         FeedbackSessionAttributes fs = dataBundle.feedbackSessions.get("session1InCourse1");
-        
+
         String[] params = new String[]{
                 Const.ParamsNames.COURSE_ID, fs.getCourseId(),
                 Const.ParamsNames.FEEDBACK_SESSION_NAME, fs.getFeedbackSessionName(),
@@ -72,7 +66,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         };
 
         InstructorFeedbackQuestionAddAction action = getAction(params);
-        RedirectResult result = (RedirectResult) action.executeAndPostProcess();
+        RedirectResult result = getRedirectResult(action);
 
         assertEquals(Const.ActionURIs.INSTRUCTOR_FEEDBACK_EDIT_PAGE + "?courseid=" + instructor1ofCourse1.courseId
                      + "&fsname=First+feedback+session" + "&user=" + instructor1ofCourse1.googleId + "&error=false",
@@ -114,7 +108,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         };
 
         action = getAction(params);
-        result = (RedirectResult) action.executeAndPostProcess();
+        result = getRedirectResult(action);
 
         assertEquals(Const.ActionURIs.INSTRUCTOR_FEEDBACK_EDIT_PAGE + "?courseid=" + instructor1ofCourse1.courseId
                      + "&fsname=First+feedback+session" + "&user=" + instructor1ofCourse1.googleId + "&error=false",
@@ -132,7 +126,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
                              + " created.<br><span class=\"bold\">Multiple-choice (multiple answers) question:</span> "
                              + "Who do you like in the class?|||/page/instructorFeedbackQuestionAdd";
         AssertHelper.assertLogMessageEquals(expectedLogMessage, action.getLogMessage());
-        
+
         ______TS("Enable other option");
 
         params = new String[]{
@@ -159,7 +153,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         };
 
         action = getAction(params);
-        result = (RedirectResult) action.executeAndPostProcess();
+        result = getRedirectResult(action);
 
         assertEquals(Const.ActionURIs.INSTRUCTOR_FEEDBACK_EDIT_PAGE + "?courseid=" + instructor1ofCourse1.courseId
                      + "&fsname=First+feedback+session" + "&user=" + instructor1ofCourse1.googleId + "&error=false",
@@ -188,7 +182,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         ______TS("Typical case");
 
         FeedbackSessionAttributes fs = dataBundle.feedbackSessions.get("session1InCourse1");
-        
+
         String[] params = new String[]{
                 Const.ParamsNames.COURSE_ID, fs.getCourseId(),
                 Const.ParamsNames.FEEDBACK_SESSION_NAME, fs.getFeedbackSessionName(),
@@ -216,7 +210,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         };
 
         InstructorFeedbackQuestionAddAction action = getAction(params);
-        RedirectResult result = (RedirectResult) action.executeAndPostProcess();
+        RedirectResult result = getRedirectResult(action);
 
         assertEquals(Const.ActionURIs.INSTRUCTOR_FEEDBACK_EDIT_PAGE + "?courseid=" + instructor1ofCourse1.courseId
                      + "&fsname=First+feedback+session" + "&user=" + instructor1ofCourse1.googleId + "&error=false",
@@ -258,7 +252,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         };
 
         action = getAction(params);
-        result = (RedirectResult) action.executeAndPostProcess();
+        result = getRedirectResult(action);
 
         assertEquals(Const.ActionURIs.INSTRUCTOR_FEEDBACK_EDIT_PAGE + "?courseid=" + instructor1ofCourse1.courseId
                      + "&fsname=First+feedback+session" + "&user=" + instructor1ofCourse1.googleId + "&error=false",
@@ -276,7 +270,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
                              + " created.<br><span class=\"bold\">Multiple-choice (single answer) question:</span> "
                              + "Who do you like best in the class?|||/page/instructorFeedbackQuestionAdd";
         AssertHelper.assertLogMessageEquals(expectedLogMessage, action.getLogMessage());
-        
+
         ______TS("Enable other option");
 
         params = new String[]{
@@ -304,7 +298,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         };
 
         action = getAction(params);
-        result = (RedirectResult) action.executeAndPostProcess();
+        result = getRedirectResult(action);
 
         assertEquals(Const.ActionURIs.INSTRUCTOR_FEEDBACK_EDIT_PAGE + "?courseid=" + instructor1ofCourse1.courseId
                      + "&fsname=First+feedback+session" + "&user=" + instructor1ofCourse1.googleId + "&error=false",
@@ -333,7 +327,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         ______TS("Typical case");
 
         FeedbackSessionAttributes fs = dataBundle.feedbackSessions.get("session1InCourse1");
-        
+
         String[] params = new String[]{
                 Const.ParamsNames.COURSE_ID, fs.getCourseId(),
                 Const.ParamsNames.FEEDBACK_SESSION_NAME, fs.getFeedbackSessionName(),
@@ -355,7 +349,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         };
 
         InstructorFeedbackQuestionAddAction action = getAction(params);
-        RedirectResult result = (RedirectResult) action.executeAndPostProcess();
+        RedirectResult result = getRedirectResult(action);
 
         assertEquals(Const.ActionURIs.INSTRUCTOR_FEEDBACK_EDIT_PAGE + "?courseid=" + instructor1ofCourse1.courseId
                      + "&fsname=First+feedback+session" + "&user=" + instructor1ofCourse1.googleId + "&error=false",
@@ -384,7 +378,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         ______TS("Typical case");
 
         FeedbackSessionAttributes fs = dataBundle.feedbackSessions.get("session1InCourse1");
-        
+
         String[] params = new String[]{
                 Const.ParamsNames.COURSE_ID, fs.getCourseId(),
                 Const.ParamsNames.FEEDBACK_SESSION_NAME, fs.getFeedbackSessionName(),
@@ -412,7 +406,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         };
 
         InstructorFeedbackQuestionAddAction action = getAction(params);
-        RedirectResult result = (RedirectResult) action.executeAndPostProcess();
+        RedirectResult result = getRedirectResult(action);
 
         assertEquals(Const.ActionURIs.INSTRUCTOR_FEEDBACK_EDIT_PAGE + "?courseid=" + instructor1ofCourse1.courseId
                      + "&fsname=First+feedback+session" + "&user=" + instructor1ofCourse1.googleId + "&error=false",
@@ -466,7 +460,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         };
 
         InstructorFeedbackQuestionAddAction action = getAction(params);
-        RedirectResult result = (RedirectResult) action.executeAndPostProcess();
+        RedirectResult result = getRedirectResult(action);
 
         assertEquals(Const.ActionURIs.INSTRUCTOR_FEEDBACK_EDIT_PAGE + "?courseid=" + instructor1ofCourse1.courseId
                      + "&fsname=First+feedback+session" + "&user=" + instructor1ofCourse1.googleId + "&error=false",
@@ -497,7 +491,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         ______TS("Typical case");
 
         FeedbackSessionAttributes fs = dataBundle.feedbackSessions.get("session1InCourse1");
-        
+
         String[] params = new String[]{
                 Const.ParamsNames.COURSE_ID, fs.getCourseId(),
                 Const.ParamsNames.FEEDBACK_SESSION_NAME, fs.getFeedbackSessionName(),
@@ -518,7 +512,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         };
 
         InstructorFeedbackQuestionAddAction action = getAction(params);
-        RedirectResult result = (RedirectResult) action.executeAndPostProcess();
+        RedirectResult result = getRedirectResult(action);
 
         assertEquals(Const.ActionURIs.INSTRUCTOR_FEEDBACK_EDIT_PAGE + "?courseid=" + instructor1ofCourse1.courseId
                      + "&fsname=First+feedback+session" + "&user=" + instructor1ofCourse1.googleId + "&error=false",
@@ -558,7 +552,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         };
 
         action = getAction(params);
-        result = (RedirectResult) action.executeAndPostProcess();
+        result = getRedirectResult(action);
 
         assertEquals(Const.ActionURIs.INSTRUCTOR_FEEDBACK_EDIT_PAGE + "?courseid=" + instructor1ofCourse1.courseId
                      + "&fsname=First+feedback+session" + "&user=" + instructor1ofCourse1.googleId + "&error=true",
@@ -621,7 +615,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         };
 
         InstructorFeedbackQuestionAddAction action = getAction(params);
-        RedirectResult result = (RedirectResult) action.executeAndPostProcess();
+        RedirectResult result = getRedirectResult(action);
 
         assertEquals(Const.ActionURIs.INSTRUCTOR_FEEDBACK_EDIT_PAGE + "?courseid=" + instructor1ofCourse1.courseId
                      + "&fsname=First+feedback+session" + "&user=" + instructor1ofCourse1.googleId + "&error=false",
@@ -640,6 +634,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         AssertHelper.assertLogMessageEquals(expectedLogMessage, action.getLogMessage());
     }
 
+    @Override
     @Test
     public void testExecuteAndPostProcess() {
         InstructorAttributes instructor1ofCourse1 = dataBundle.instructors.get("instructor1OfCourse1");
@@ -682,7 +677,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         modifyParamValue(params, Const.ParamsNames.FEEDBACK_QUESTION_NUMBER, "ABC");
 
         try {
-            Action c = gaeSimulation.getActionObject(uri, params);
+            InstructorFeedbackQuestionAddAction c = getAction(params);
             c.executeAndPostProcess();
             signalFailureToDetectException();
         } catch (NumberFormatException e) {
@@ -695,7 +690,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         modifyParamValue(params, Const.ParamsNames.FEEDBACK_QUESTION_GIVERTYPE, "NON_EXISTENT_ENUMERATION");
 
         try {
-            Action c = gaeSimulation.getActionObject(uri, params);
+            InstructorFeedbackQuestionAddAction c = getAction(params);
             c.executeAndPostProcess();
             signalFailureToDetectException();
         } catch (IllegalArgumentException e) {
@@ -706,7 +701,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         modifyParamValue(params, Const.ParamsNames.FEEDBACK_QUESTION_RECIPIENTTYPE, "NON_EXISTENT_ENUMERATION");
 
         try {
-            Action c = gaeSimulation.getActionObject(uri, params);
+            InstructorFeedbackQuestionAddAction c = getAction(params);
             c.executeAndPostProcess();
             signalFailureToDetectException();
         } catch (IllegalArgumentException e) {
@@ -717,7 +712,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         modifyParamValue(params, Const.ParamsNames.FEEDBACK_QUESTION_TYPE, "NON_EXISTENT_ENUMERATION");
 
         try {
-            Action c = gaeSimulation.getActionObject(uri, params);
+            InstructorFeedbackQuestionAddAction c = getAction(params);
             c.executeAndPostProcess();
             signalFailureToDetectException();
         } catch (IllegalArgumentException e) {
@@ -730,7 +725,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         // change number of feedback to give to unlimited
         modifyParamValue(params, Const.ParamsNames.FEEDBACK_QUESTION_NUMBEROFENTITIESTYPE, "max");
         InstructorFeedbackQuestionAddAction action = getAction(params);
-        RedirectResult result = (RedirectResult) action.executeAndPostProcess();
+        RedirectResult result = getRedirectResult(action);
 
         assertEquals(Const.ActionURIs.INSTRUCTOR_FEEDBACK_EDIT_PAGE + "?courseid=" + instructor1ofCourse1.courseId
                      + "&fsname=First+feedback+session" + "&user=" + instructor1ofCourse1.googleId + "&error=false",
@@ -753,7 +748,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
 
         params = createParamsForTypicalFeedbackQuestion(fs.getCourseId(), fs.getFeedbackSessionName());
         action = getAction(params);
-        result = (RedirectResult) action.executeAndPostProcess();
+        result = getRedirectResult(action);
 
         assertEquals(Const.ActionURIs.INSTRUCTOR_FEEDBACK_EDIT_PAGE + "?courseid=" + instructor1ofCourse1.courseId
                      + "&fsname=First+feedback+session" + "&user=" + instructor1ofCourse1.googleId + "&error=false",
@@ -778,7 +773,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         modifyParamValue(params, Const.ParamsNames.FEEDBACK_QUESTION_RECIPIENTTYPE, "TEAMS");
 
         action = getAction(params);
-        result = (RedirectResult) action.executeAndPostProcess();
+        result = getRedirectResult(action);
 
         assertEquals(Const.ActionURIs.INSTRUCTOR_FEEDBACK_EDIT_PAGE + "?courseid=" + instructor1ofCourse1.courseId
                      + "&fsname=First+feedback+session" + "&user=" + instructor1ofCourse1.googleId + "&error=false",
@@ -803,7 +798,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         modifyParamValue(params, Const.ParamsNames.FEEDBACK_QUESTION_RECIPIENTTYPE, "INSTRUCTORS");
 
         action = getAction(params);
-        result = (RedirectResult) action.executeAndPostProcess();
+        result = getRedirectResult(action);
 
         assertEquals(Const.ActionURIs.INSTRUCTOR_FEEDBACK_EDIT_PAGE + "?courseid=" + instructor1ofCourse1.courseId
                      + "&fsname=First+feedback+session" + "&user=" + instructor1ofCourse1.googleId + "&error=false",
@@ -830,11 +825,11 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         // Purposely not using modifyParamVale because we're removing showRecipientTo
         params[22] = Const.ParamsNames.FEEDBACK_QUESTION_EDITTYPE;
         params[23] = "edit";
-        
+
         params = Arrays.copyOf(params, 24);
 
         action = getAction(params);
-        result = (RedirectResult) action.executeAndPostProcess();
+        result = getRedirectResult(action);
 
         assertEquals(Const.ActionURIs.INSTRUCTOR_FEEDBACK_EDIT_PAGE + "?courseid=" + instructor1ofCourse1.courseId
                      + "&fsname=First+feedback+session" + "&user=" + instructor1ofCourse1.googleId + "&error=false",
@@ -857,7 +852,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         params = createParamsForTypicalFeedbackQuestion(instructor1ofCourse1.courseId, fs.getFeedbackSessionName());
         modifyParamValue(params, Const.ParamsNames.FEEDBACK_QUESTION_GIVERTYPE, "NONE");
         action = getAction(params);
-        result = (RedirectResult) action.executeAndPostProcess();
+        result = getRedirectResult(action);
 
         assertEquals(Const.ActionURIs.INSTRUCTOR_FEEDBACK_EDIT_PAGE + "?courseid=" + instructor1ofCourse1.courseId
                      + "&fsname=First+feedback+session" + "&user=" + instructor1ofCourse1.googleId + "&error=true",
@@ -882,7 +877,7 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         params = addUserIdToParams(instructor1ofCourse1.googleId, params);
 
         action = getAction(params);
-        result = (RedirectResult) action.executeAndPostProcess();
+        result = getRedirectResult(action);
 
         assertEquals(Const.ActionURIs.INSTRUCTOR_FEEDBACK_EDIT_PAGE + "?courseid=" + instructor1ofCourse1.courseId
                      + "&fsname=First+feedback+session" + "&user=" + instructor1ofCourse1.googleId + "&error=false",
@@ -902,7 +897,8 @@ public class InstructorFeedbackQuestionAddActionTest extends BaseActionTest {
         AssertHelper.assertLogMessageEquals(expectedLogMessage, action.getLogMessage());
     }
 
-    private InstructorFeedbackQuestionAddAction getAction(String... params) {
-        return (InstructorFeedbackQuestionAddAction) gaeSimulation.getActionObject(uri, params);
+    @Override
+    protected InstructorFeedbackQuestionAddAction getAction(String... params) {
+        return (InstructorFeedbackQuestionAddAction) gaeSimulation.getActionObject(getActionUri(), params);
     }
 }

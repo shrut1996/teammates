@@ -1,10 +1,8 @@
 package teammates.test.cases.action;
 
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import teammates.common.datatransfer.DataBundle;
-import teammates.common.datatransfer.InstructorAttributes;
+import teammates.common.datatransfer.attributes.InstructorAttributes;
 import teammates.common.util.Const;
 import teammates.common.util.FieldValidator;
 import teammates.logic.core.CoursesLogic;
@@ -12,16 +10,13 @@ import teammates.ui.controller.InstructorCourseEditSaveAction;
 import teammates.ui.controller.RedirectResult;
 
 public class InstructorCourseEditSaveActionTest extends BaseActionTest {
-    
-    private final DataBundle dataBundle = getTypicalDataBundle();
 
-    @BeforeClass
-    public void classSetup() {
-        printTestClassHeader();
-        removeAndRestoreTypicalDataBundle();
-        uri = Const.ActionURIs.INSTRUCTOR_COURSE_EDIT_SAVE;
+    @Override
+    protected String getActionUri() {
+        return Const.ActionURIs.INSTRUCTOR_COURSE_EDIT_SAVE;
     }
-    
+
+    @Override
     @Test
     public void testExecuteAndPostProcess() throws Exception {
         InstructorAttributes instructor = dataBundle.instructors.get("instructor1OfCourse1");
@@ -45,11 +40,11 @@ public class InstructorCourseEditSaveActionTest extends BaseActionTest {
                 Const.ParamsNames.COURSE_NAME, courseName,
                 Const.ParamsNames.COURSE_TIME_ZONE, courseTimeZone
         };
-        
+
         // execute the action
         courseEditSaveAction = getAction(submissionParams);
         redirectResult = getRedirectResult(courseEditSaveAction);
-        
+
         // get updated results and compare
         statusMessage = Const.StatusMessages.COURSE_EDITED;
         assertEquals(statusMessage, redirectResult.getStatusMessage());
@@ -138,7 +133,7 @@ public class InstructorCourseEditSaveActionTest extends BaseActionTest {
         assertEquals(Const.ActionURIs.INSTRUCTOR_COURSE_EDIT_PAGE
                      + "?error=true&user=" + instructorId + "&courseid=" + courseId,
                      redirectResult.getDestinationWithParams());
-        
+
         ______TS("Failure case: invalid time zone");
         courseName = CoursesLogic.inst().getCourse(courseId).getName();
         courseTimeZone = "InvalidTimeZone";
@@ -160,7 +155,8 @@ public class InstructorCourseEditSaveActionTest extends BaseActionTest {
                      redirectResult.getDestinationWithParams());
     }
 
-    private InstructorCourseEditSaveAction getAction(String... params) {
-        return (InstructorCourseEditSaveAction) gaeSimulation.getActionObject(uri, params);
+    @Override
+    protected InstructorCourseEditSaveAction getAction(String... params) {
+        return (InstructorCourseEditSaveAction) gaeSimulation.getActionObject(getActionUri(), params);
     }
 }

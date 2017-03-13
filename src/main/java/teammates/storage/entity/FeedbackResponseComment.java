@@ -11,7 +11,7 @@ import javax.jdo.annotations.PrimaryKey;
 
 import teammates.common.datatransfer.CommentSendingState;
 import teammates.common.datatransfer.FeedbackParticipantType;
-import teammates.common.util.Sanitizer;
+import teammates.common.util.SanitizationHelper;
 
 import com.google.appengine.api.datastore.Text;
 
@@ -25,24 +25,23 @@ public class FeedbackResponseComment {
     @PrimaryKey
     @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
     private transient Long feedbackResponseCommentId;
-    
+
     /** The foreign key to locate the Course object. */
     @Persistent
     private String courseId;
-    
+
     /** The foreign key to locate the FeedbackSession object. */
     @Persistent
     private String feedbackSessionName;
-    
+
     /** The foreign key to locate the FeedbackQuestion object. */
     @Persistent
     private String feedbackQuestionId;
-    
-    
+
     /** The course-specific email used by the giver of the comment. */
     @Persistent
     private String giverEmail;
-    
+
     /** The foreign key to locate the FeedbackResponse object commented on. */
     @Persistent
     private String feedbackResponseId;
@@ -58,34 +57,34 @@ public class FeedbackResponseComment {
     /* Response receiver section */
     @Persistent
     private String receiverSection;
-    
+
     /** visibility settings **/
     @Persistent
     private List<FeedbackParticipantType> showCommentTo;
-    
+
     @Persistent
     private List<FeedbackParticipantType> showGiverNameTo;
-    
+
     @Persistent
     private Boolean isVisibilityFollowingFeedbackQuestion;
 
     /** The creation time of this comment. */
     @Persistent
     private Date createdAt;
-    
+
     /** The comment from giver about the feedback response */
     @Persistent
     @Extension(vendorName = "datanucleus", key = "gae.unindexed", value = "true")
     private Text commentText;
-    
+
     /** The e-mail of the account that last edited the comment */
     @Persistent
     private String lastEditorEmail;
-    
+
     /** The time in which the comment is last edited */
     @Persistent
     private Date lastEditedAt;
-    
+
     public FeedbackResponseComment(String courseId, String feedbackSessionName,
             String feedbackQuestionId, String giverEmail, String feedbackResponseId,
             CommentSendingState sendingState, Date createdAt, Text commentText,
@@ -99,7 +98,7 @@ public class FeedbackResponseComment {
         this.feedbackResponseId = feedbackResponseId;
         this.sendingState = sendingState;
         this.createdAt = createdAt;
-        this.commentText = Sanitizer.sanitizeForRichText(commentText);
+        this.commentText = SanitizationHelper.sanitizeForRichText(commentText);
         this.giverSection = giverSection;
         this.receiverSection = receiverSection;
         this.showCommentTo = showCommentTo;
@@ -137,7 +136,7 @@ public class FeedbackResponseComment {
     public void setFeedbackSessionName(String feedbackSessionName) {
         this.feedbackSessionName = feedbackSessionName;
     }
-    
+
     public String getFeedbackQuestionId() {
         return feedbackQuestionId;
     }
@@ -145,11 +144,11 @@ public class FeedbackResponseComment {
     public void setFeedbackQuestionId(String feedbackQuestionId) {
         this.feedbackQuestionId = feedbackQuestionId;
     }
-    
+
     public Boolean getIsVisibilityFollowingFeedbackQuestion() {
         return this.isVisibilityFollowingFeedbackQuestion;
     }
-    
+
     public void setIsVisibilityFollowingFeedbackQuestion(Boolean isVisibilityFollowingFeedbackQuestion) {
         this.isVisibilityFollowingFeedbackQuestion = isVisibilityFollowingFeedbackQuestion;
     }
@@ -170,15 +169,15 @@ public class FeedbackResponseComment {
     public void setShowCommentTo(List<FeedbackParticipantType> showCommentTo) {
         this.showCommentTo = showCommentTo;
     }
-    
+
     public List<FeedbackParticipantType> getShowCommentTo() {
         return showCommentTo;
     }
-    
+
     public void setShowGiverNameTo(List<FeedbackParticipantType> showGiverNameTo) {
         this.showGiverNameTo = showGiverNameTo;
     }
-    
+
     public List<FeedbackParticipantType> getShowGiverNameTo() {
         return showGiverNameTo;
     }
@@ -198,15 +197,15 @@ public class FeedbackResponseComment {
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
-    
+
     public CommentSendingState getSendingState() {
         return sendingState;
     }
-    
+
     public void setSendingState(CommentSendingState sendingState) {
         this.sendingState = sendingState;
     }
-    
+
     public Text getCommentText() {
         return commentText;
     }
@@ -234,11 +233,11 @@ public class FeedbackResponseComment {
     public void setLastEditorEmail(String lastEditorEmail) {
         this.lastEditorEmail = lastEditorEmail;
     }
-    
+
     public String getLastEditorEmail() {
         return this.lastEditorEmail;
     }
-    
+
     public Date getLastEditedAt() {
         return this.lastEditedAt;
     }

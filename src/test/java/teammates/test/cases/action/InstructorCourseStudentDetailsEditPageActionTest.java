@@ -1,48 +1,43 @@
 package teammates.test.cases.action;
 
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import teammates.common.datatransfer.DataBundle;
-import teammates.common.datatransfer.InstructorAttributes;
-import teammates.common.datatransfer.StudentAttributes;
+import teammates.common.datatransfer.attributes.InstructorAttributes;
+import teammates.common.datatransfer.attributes.StudentAttributes;
 import teammates.common.util.Const;
 import teammates.test.driver.AssertHelper;
 import teammates.ui.controller.InstructorCourseStudentDetailsEditPageAction;
-import teammates.ui.controller.InstructorCourseStudentDetailsEditPageData;
 import teammates.ui.controller.ShowPageResult;
+import teammates.ui.pagedata.InstructorCourseStudentDetailsEditPageData;
 
 public class InstructorCourseStudentDetailsEditPageActionTest extends BaseActionTest {
 
-    private final DataBundle dataBundle = getTypicalDataBundle();
-
-    @BeforeClass
-    public void classSetup() {
-        printTestClassHeader();
-        removeAndRestoreTypicalDataBundle();
-        uri = Const.ActionURIs.INSTRUCTOR_COURSE_STUDENT_DETAILS_EDIT;
+    @Override
+    protected String getActionUri() {
+        return Const.ActionURIs.INSTRUCTOR_COURSE_STUDENT_DETAILS_EDIT;
     }
-    
+
+    @Override
     @Test
     public void testExecuteAndPostProcess() {
-        
+
         InstructorAttributes instructor1OfCourse1 = dataBundle.instructors.get("instructor1OfCourse1");
         StudentAttributes student1InCourse1 = dataBundle.students.get("student1InCourse1");
-        
+
         String instructorId = instructor1OfCourse1.googleId;
         gaeSimulation.loginAsInstructor(instructorId);
-        
+
         ______TS("Invalid parameters");
-        
+
         //no parameters
         verifyAssumptionFailure();
-        
+
         //null student email
         String[] invalidParams = new String[]{
                 Const.ParamsNames.COURSE_ID, instructor1OfCourse1.courseId
         };
         verifyAssumptionFailure(invalidParams);
-        
+
         //null course id
         invalidParams = new String[]{
                 Const.ParamsNames.STUDENT_EMAIL, student1InCourse1.email
@@ -55,15 +50,15 @@ public class InstructorCourseStudentDetailsEditPageActionTest extends BaseAction
                 Const.ParamsNames.COURSE_ID, instructor1OfCourse1.courseId,
                 Const.ParamsNames.STUDENT_EMAIL, student1InCourse1.email
         };
-        
+
         InstructorCourseStudentDetailsEditPageAction a = getAction(submissionParams);
         ShowPageResult r = getShowPageResult(a);
-        
+
         assertEquals(Const.ViewURIs.INSTRUCTOR_COURSE_STUDENT_EDIT + "?error=false&"
                 + "user=idOfInstructor1OfCourse1", r.getDestinationWithParams());
         assertFalse(r.isError);
         assertEquals("", r.getStatusMessage());
-        
+
         InstructorCourseStudentDetailsEditPageData pageData = (InstructorCourseStudentDetailsEditPageData) r.data;
         assertEquals(instructorId, pageData.account.googleId);
         assertEquals(student1InCourse1.name, pageData.getStudentInfoTable().getName());
@@ -72,7 +67,7 @@ public class InstructorCourseStudentDetailsEditPageActionTest extends BaseAction
         assertEquals(student1InCourse1.team, pageData.getStudentInfoTable().getTeam());
         assertEquals(student1InCourse1.comments, pageData.getStudentInfoTable().getComments());
         assertEquals(student1InCourse1.course, pageData.getStudentInfoTable().getCourse());
-        
+
         String expectedLogMessage = "TEAMMATESLOG|||instructorCourseStudentDetailsEdit|||instructorCourseStudentDetailsEdit"
                                   + "|||true|||Instructor|||Instructor 1 of Course 1|||idOfInstructor1OfCourse1"
                                   + "|||instr1@course1.tmt|||instructorCourseStudentEdit Page Load<br>Editing Student "
@@ -82,9 +77,10 @@ public class InstructorCourseStudentDetailsEditPageActionTest extends BaseAction
         AssertHelper.assertLogMessageEquals(expectedLogMessage, a.getLogMessage());
 
     }
-    
-    private InstructorCourseStudentDetailsEditPageAction getAction(String... params) {
-        return (InstructorCourseStudentDetailsEditPageAction) gaeSimulation.getActionObject(uri, params);
+
+    @Override
+    protected InstructorCourseStudentDetailsEditPageAction getAction(String... params) {
+        return (InstructorCourseStudentDetailsEditPageAction) gaeSimulation.getActionObject(getActionUri(), params);
     }
 
 }

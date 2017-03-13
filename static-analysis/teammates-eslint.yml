@@ -2,6 +2,10 @@ env:
     browser: true
     jquery: true
     qunit: true
+
+plugins:
+    - json
+
 rules:
 
     #################################################################################
@@ -321,7 +325,7 @@ rules:
     # Strict Mode
 
     # require or disallow strict mode directives
-    strict: "off" # recommended by Airbnb
+    strict: ["error", "global"]
 
     # Variables
 
@@ -526,7 +530,7 @@ rules:
     # no-ternary: "off"
 
     # disallow trailing whitespace at the end of lines
-    no-trailing-spaces: ["error", { "skipBlankLines": true }]
+    no-trailing-spaces: "error"
 
     # disallow dangling underscores in identifiers
     no-underscore-dangle: "error"

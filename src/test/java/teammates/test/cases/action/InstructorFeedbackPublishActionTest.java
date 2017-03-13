@@ -3,11 +3,9 @@ package teammates.test.cases.action;
 import java.util.Date;
 import java.util.Map;
 
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import teammates.common.datatransfer.DataBundle;
-import teammates.common.datatransfer.FeedbackSessionAttributes;
+import teammates.common.datatransfer.attributes.FeedbackSessionAttributes;
 import teammates.common.util.Const;
 import teammates.common.util.Const.ParamsNames;
 import teammates.common.util.TaskWrapper;
@@ -17,17 +15,13 @@ import teammates.ui.controller.InstructorFeedbackPublishAction;
 import teammates.ui.controller.RedirectResult;
 
 public class InstructorFeedbackPublishActionTest extends BaseActionTest {
-    private static final boolean PUBLISHED = true;
-    private static final boolean UNPUBLISHED = false;
-    private final DataBundle dataBundle = getTypicalDataBundle();
-    
-    @BeforeClass
-    public void classSetup() {
-        printTestClassHeader();
-        removeAndRestoreTypicalDataBundle();
-        uri = Const.ActionURIs.INSTRUCTOR_FEEDBACK_PUBLISH;
+
+    @Override
+    protected String getActionUri() {
+        return Const.ActionURIs.INSTRUCTOR_FEEDBACK_PUBLISH;
     }
-    
+
+    @Override
     @Test
     public void testExecuteAndPostProcess() throws Exception {
         gaeSimulation.loginAsInstructor(dataBundle.instructors.get("instructor1OfCourse1").googleId);
@@ -45,86 +39,86 @@ public class InstructorFeedbackPublishActionTest extends BaseActionTest {
                 Const.ParamsNames.COURSE_ID,
                 session.getCourseId()
         };
-        
+
         ______TS("Typical successful case: session publishable");
-        
+
         makeFeedbackSessionUnpublished(session);
-        
+
         InstructorFeedbackPublishAction publishAction = getAction(paramsNormal);
-        RedirectResult result = (RedirectResult) publishAction.executeAndPostProcess();
-        
+        RedirectResult result = getRedirectResult(publishAction);
+
         String expectedDestination = Const.ActionURIs.INSTRUCTOR_FEEDBACKS_PAGE
                                      + "?error=false"
                                      + "&user=idOfInstructor1OfCourse1";
-        
+
         assertEquals(expectedDestination, result.getDestinationWithParams());
         assertEquals(Const.StatusMessages.FEEDBACK_SESSION_PUBLISHED, result.getStatusMessage());
         assertFalse(result.isError);
-        
+
         verifySpecifiedTasksAdded(publishAction, Const.TaskQueue.FEEDBACK_SESSION_PUBLISHED_EMAIL_QUEUE_NAME, 1);
-        
+
         TaskWrapper taskAdded = publishAction.getTaskQueuer().getTasksAdded().get(0);
         Map<String, String[]> paramMap = taskAdded.getParamMap();
         assertEquals(session.getCourseId(), paramMap.get(ParamsNames.EMAIL_COURSE)[0]);
         assertEquals(session.getSessionName(), paramMap.get(ParamsNames.EMAIL_FEEDBACK)[0]);
-        
+
         ______TS("Unsuccessful case 1: params with null course id");
-        
+
         String errorMessage = "";
         publishAction = getAction(paramsWithNullCourseId);
-        
+
         try {
             publishAction.executeAndPostProcess();
             signalFailureToDetectException("AssertionError expected");
         } catch (AssertionError e) {
             errorMessage = e.getMessage();
         }
-        
+
         assertEquals(Const.StatusCodes.NULL_PARAMETER, errorMessage);
-        
+
         ______TS("Unsuccessful case 2: params with null feedback session name");
-        
+
         errorMessage = "";
         publishAction = getAction(paramsWithNullFeedbackSessionName);
-        
+
         try {
             publishAction.executeAndPostProcess();
             signalFailureToDetectException("AssertionError expected");
         } catch (AssertionError e) {
             errorMessage = e.getMessage();
         }
-        
+
         assertEquals(Const.StatusCodes.NULL_PARAMETER, errorMessage);
-        
+
         ______TS("Unsuccessful case 3: trying to publish a session not currently unpublished");
-        
+
         makeFeedbackSessionPublished(session);
-        
+
         publishAction = getAction(paramsNormal);
-        result = (RedirectResult) publishAction.executeAndPostProcess();
-        
+        result = getRedirectResult(publishAction);
+
         expectedDestination = Const.ActionURIs.INSTRUCTOR_FEEDBACKS_PAGE + "?error=true"
                               + "&user=idOfInstructor1OfCourse1";
-        
+
         assertEquals(expectedDestination, result.getDestinationWithParams());
         assertEquals("Error publishing feedback session: Session has already been published.",
                      result.getStatusMessage());
         assertTrue(result.isError);
-        
+
         verifyNoTasksAdded(publishAction);
-        
+
         makeFeedbackSessionUnpublished(session);
     }
-    
+
     private void modifyFeedbackSessionPublishState(FeedbackSessionAttributes session, boolean isPublished) throws Exception {
         // startTime < endTime <= resultsVisibleFromTime
         Date startTime = TimeHelper.getDateOffsetToCurrentTime(-2);
         Date endTime = TimeHelper.getDateOffsetToCurrentTime(-1);
         Date resultsVisibleFromTimeForPublishedSession = TimeHelper.getDateOffsetToCurrentTime(-1);
-        
+
         session.setStartTime(startTime);
         session.setEndTime(endTime);
-        
+
         if (isPublished) {
             session.setResultsVisibleFromTime(resultsVisibleFromTimeForPublishedSession);
             assertTrue(session.isPublished());
@@ -132,21 +126,22 @@ public class InstructorFeedbackPublishActionTest extends BaseActionTest {
             session.setResultsVisibleFromTime(Const.TIME_REPRESENTS_LATER);
             assertFalse(session.isPublished());
         }
-        
+
         session.setSentPublishedEmail(false);
-        
+
         new FeedbackSessionsDb().updateFeedbackSession(session);
     }
-    
+
     private void makeFeedbackSessionUnpublished(FeedbackSessionAttributes session) throws Exception {
-        modifyFeedbackSessionPublishState(session, UNPUBLISHED);
+        modifyFeedbackSessionPublishState(session, false);
     }
-    
+
     private void makeFeedbackSessionPublished(FeedbackSessionAttributes session) throws Exception {
-        modifyFeedbackSessionPublishState(session, PUBLISHED);
+        modifyFeedbackSessionPublishState(session, true);
     }
-    
-    private InstructorFeedbackPublishAction getAction(String[] params) {
-        return (InstructorFeedbackPublishAction) gaeSimulation.getActionObject(uri, params);
+
+    @Override
+    protected InstructorFeedbackPublishAction getAction(String... params) {
+        return (InstructorFeedbackPublishAction) gaeSimulation.getActionObject(getActionUri(), params);
     }
 }

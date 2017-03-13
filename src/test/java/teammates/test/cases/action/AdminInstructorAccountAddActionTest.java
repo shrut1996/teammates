@@ -1,9 +1,8 @@
 package teammates.test.cases.action;
 
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import teammates.common.datatransfer.CommentAttributes;
+import teammates.common.datatransfer.attributes.CommentAttributes;
 import teammates.common.datatransfer.CommentParticipantType;
 import teammates.common.util.Const;
 import teammates.common.util.EmailType;
@@ -11,20 +10,20 @@ import teammates.common.util.EmailWrapper;
 import teammates.common.util.StringHelper;
 import teammates.logic.api.Logic;
 import teammates.logic.core.CommentsLogic;
-import teammates.ui.controller.AdminHomePageData;
 import teammates.ui.controller.AdminInstructorAccountAddAction;
 import teammates.ui.controller.AjaxResult;
+import teammates.ui.pagedata.AdminHomePageData;
 
 public class AdminInstructorAccountAddActionTest extends BaseActionTest {
 
-    // private final DataBundle dataBundle = getTypicalDataBundle();
-    //TODO: move all the input validation/sanitization js code to server side
-    
-    @BeforeClass
-    public void classSetup() {
-        printTestClassHeader();
-        uri = Const.ActionURIs.ADMIN_INSTRUCTORACCOUNT_ADD;
-        // removeAndRestoreTypicalDataInDatastore();
+    @Override
+    protected String getActionUri() {
+        return Const.ActionURIs.ADMIN_INSTRUCTORACCOUNT_ADD;
+    }
+
+    @Override
+    protected void prepareTestData() {
+        // no test data used in this test
     }
 
     @Test
@@ -32,7 +31,8 @@ public class AdminInstructorAccountAddActionTest extends BaseActionTest {
         testGenerateNextDemoCourseIdForLengthLimit(40);
         testGenerateNextDemoCourseIdForLengthLimit(20);
     }
-    
+
+    @Override
     @Test
     public void testExecuteAndPostProcess() throws Exception {
         final String newInstructorShortName = "James";
@@ -40,9 +40,9 @@ public class AdminInstructorAccountAddActionTest extends BaseActionTest {
         final String email = "jamesbond89@gmail.tmt";
         final String institute = "TEAMMATES Test Institute 1";
         final String adminUserId = "admin.user";
-        
+
         ______TS("Not enough parameters");
-        
+
         gaeSimulation.loginAsAdmin(adminUserId);
         verifyAssumptionFailure();
         verifyAssumptionFailure(Const.ParamsNames.INSTRUCTOR_SHORT_NAME, newInstructorShortName);
@@ -72,19 +72,19 @@ public class AdminInstructorAccountAddActionTest extends BaseActionTest {
                 Const.ParamsNames.INSTRUCTOR_NAME, nameWithSpaces,
                 Const.ParamsNames.INSTRUCTOR_EMAIL, emailWithSpaces,
                 Const.ParamsNames.INSTRUCTOR_INSTITUTION, instituteWithSpaces);
-        
-        AjaxResult r = (AjaxResult) a.executeAndPostProcess();
+
+        AjaxResult r = getAjaxResult(a);
         assertTrue(r.getStatusMessage().contains("Instructor " + name + " has been successfully created"));
-        
+
         verifyNumberOfEmailsSent(a, 1);
-        
+
         EmailWrapper emailSent = a.getEmailSender().getEmailsSent().get(0);
         assertEquals(String.format(EmailType.NEW_INSTRUCTOR_ACCOUNT.getSubject(), newInstructorShortName),
                      emailSent.getSubject());
         assertEquals(email, emailSent.getRecipient());
-        
+
         ______TS("Error: invalid parameter");
-        
+
         final String anotherNewInstructorShortName = "Bond";
         final String invalidName = "James%20Bond99";
         a = getAction(
@@ -97,36 +97,36 @@ public class AdminInstructorAccountAddActionTest extends BaseActionTest {
                 "\"" + invalidName + "\" is not acceptable to TEAMMATES as a/an person name because "
                 + "it contains invalid characters. All person name must start with an "
                 + "alphanumeric character, and cannot contain any vertical bar (|) or percent sign (%).";
-        
-        AjaxResult rInvalidParam = (AjaxResult) a.executeAndPostProcess();
+
+        AjaxResult rInvalidParam = getAjaxResult(a);
         assertEquals(expectedError, rInvalidParam.getStatusMessage());
-        
+
         AdminHomePageData pageData = (AdminHomePageData) rInvalidParam.data;
         assertEquals(email, pageData.instructorEmail);
         assertEquals(anotherNewInstructorShortName, pageData.instructorShortName);
         assertEquals(institute, pageData.instructorInstitution);
         assertEquals(invalidName, pageData.instructorName);
-        
+
         verifyNoEmailsSent(a);
-        
+
         ______TS("Normal case: importing demo couse");
-        
+
         a = getAction(
                 Const.ParamsNames.INSTRUCTOR_SHORT_NAME, anotherNewInstructorShortName,
                 Const.ParamsNames.INSTRUCTOR_NAME, name,
                 Const.ParamsNames.INSTRUCTOR_EMAIL, email,
                 Const.ParamsNames.INSTRUCTOR_INSTITUTION, institute);
-        
-        r = (AjaxResult) a.executeAndPostProcess();
+
+        r = getAjaxResult(a);
         assertTrue(r.getStatusMessage().contains("Instructor " + name + " has been successfully created"));
-        
+
         verifyNumberOfEmailsSent(a, 1);
-        
+
         emailSent = a.getEmailSender().getEmailsSent().get(0);
         assertEquals(String.format(EmailType.NEW_INSTRUCTOR_ACCOUNT.getSubject(), anotherNewInstructorShortName),
                      emailSent.getSubject());
         assertEquals(email, emailSent.getRecipient());
-        
+
         // delete the comment that was created
         CommentAttributes comment =
                 CommentsLogic.inst().getCommentsForReceiver(getDemoCourseIdRoot(email),
@@ -169,7 +169,7 @@ public class AdminInstructorAccountAddActionTest extends BaseActionTest {
                      generateNextDemoCourseId(strOneCharShorterThanMaximum.substring(1) + normalIdSuffix + "9",
                                               maximumIdLength));
     }
-    
+
     private String generateNextDemoCourseId(String instructorEmailOrProposedCourseId, int maximumIdLength)
             throws Exception {
         AdminInstructorAccountAddAction a = new AdminInstructorAccountAddAction();
@@ -178,8 +178,9 @@ public class AdminInstructorAccountAddActionTest extends BaseActionTest {
                                      a, new Object[] { instructorEmailOrProposedCourseId, maximumIdLength });
     }
 
-    private AdminInstructorAccountAddAction getAction(String... parameters) {
-        return (AdminInstructorAccountAddAction) gaeSimulation.getActionObject(uri, parameters);
+    @Override
+    protected AdminInstructorAccountAddAction getAction(String... params) {
+        return (AdminInstructorAccountAddAction) gaeSimulation.getActionObject(getActionUri(), params);
     }
 
     private String getDemoCourseIdRoot(String instructorEmail) {

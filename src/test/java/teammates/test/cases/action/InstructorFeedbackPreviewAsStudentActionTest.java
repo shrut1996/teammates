@@ -1,11 +1,9 @@
 package teammates.test.cases.action;
 
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import teammates.common.datatransfer.DataBundle;
-import teammates.common.datatransfer.InstructorAttributes;
-import teammates.common.datatransfer.StudentAttributes;
+import teammates.common.datatransfer.attributes.InstructorAttributes;
+import teammates.common.datatransfer.attributes.StudentAttributes;
 import teammates.common.exception.EntityNotFoundException;
 import teammates.common.exception.UnauthorizedAccessException;
 import teammates.common.util.Const;
@@ -14,15 +12,13 @@ import teammates.ui.controller.InstructorFeedbackPreviewAsStudentAction;
 import teammates.ui.controller.ShowPageResult;
 
 public class InstructorFeedbackPreviewAsStudentActionTest extends BaseActionTest {
-    private final DataBundle dataBundle = getTypicalDataBundle();
-    
-    @BeforeClass
-    public void classSetup() {
-        printTestClassHeader();
-        removeAndRestoreTypicalDataBundle();
-        uri = Const.ActionURIs.INSTRUCTOR_FEEDBACK_PREVIEW_ASSTUDENT;
+
+    @Override
+    protected String getActionUri() {
+        return Const.ActionURIs.INSTRUCTOR_FEEDBACK_PREVIEW_ASSTUDENT;
     }
-    
+
+    @Override
     @Test
     public void testExecuteAndPostProcess() {
         InstructorAttributes instructor = dataBundle.instructors.get("instructor1OfCourse1");
@@ -46,7 +42,7 @@ public class InstructorFeedbackPreviewAsStudentActionTest extends BaseActionTest
         };
 
         InstructorFeedbackPreviewAsStudentAction paia = getAction(submissionParams);
-        ShowPageResult showPageResult = (ShowPageResult) paia.executeAndPostProcess();
+        ShowPageResult showPageResult = getShowPageResult(paia);
 
         assertEquals(Const.ViewURIs.STUDENT_FEEDBACK_SUBMISSION_EDIT
                      + "?error=false"
@@ -61,33 +57,33 @@ public class InstructorFeedbackPreviewAsStudentActionTest extends BaseActionTest
                 + "Session Name: First feedback session<br>Course ID: idOfTypicalCourse1|||"
                 + "/page/instructorFeedbackPreviewAsStudent",
                 paia.getLogMessage());
-        
+
         gaeSimulation.loginAsInstructor(idOfInstructorHelper);
-        
+
         ______TS("failure: not enough privilege");
-        
+
         feedbackSessionName = "First feedback session";
         courseId = "idOfTypicalCourse1";
         previewAsEmail = student.email;
-        
+
         submissionParams = new String[]{
                 Const.ParamsNames.COURSE_ID, courseId,
                 Const.ParamsNames.FEEDBACK_SESSION_NAME, feedbackSessionName,
                 Const.ParamsNames.PREVIEWAS, previewAsEmail
         };
-        
+
         try {
             paia = getAction(submissionParams);
-            showPageResult = (ShowPageResult) paia.executeAndPostProcess();
+            showPageResult = getShowPageResult(paia);
         } catch (UnauthorizedAccessException e) {
             assertEquals("Feedback session [First feedback session] is not accessible to instructor ["
                          + instructorHelper.email + "] for privilege [canmodifysession]", e.getMessage());
         }
-        
+
         gaeSimulation.loginAsInstructor(idOfInstructor);
 
         ______TS("failure: non-existent previewas email");
-        
+
         previewAsEmail = "non-exIstentEmail@gsail.tmt";
 
         submissionParams = new String[]{
@@ -98,15 +94,16 @@ public class InstructorFeedbackPreviewAsStudentActionTest extends BaseActionTest
 
         try {
             paia = getAction(submissionParams);
-            showPageResult = (ShowPageResult) paia.executeAndPostProcess();
+            showPageResult = getShowPageResult(paia);
             signalFailureToDetectException();
         } catch (EntityNotFoundException enfe) {
             assertEquals("Student Email " + previewAsEmail + " does not exist in " + courseId + ".",
                          enfe.getMessage());
         }
     }
-            
-    private InstructorFeedbackPreviewAsStudentAction getAction(String... params) {
-        return (InstructorFeedbackPreviewAsStudentAction) gaeSimulation.getActionObject(uri, params);
+
+    @Override
+    protected InstructorFeedbackPreviewAsStudentAction getAction(String... params) {
+        return (InstructorFeedbackPreviewAsStudentAction) gaeSimulation.getActionObject(getActionUri(), params);
     }
 }

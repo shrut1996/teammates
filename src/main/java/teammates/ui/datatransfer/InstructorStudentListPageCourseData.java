@@ -1,8 +1,8 @@
 package teammates.ui.datatransfer;
 
-import teammates.common.datatransfer.CourseAttributes;
+import teammates.common.datatransfer.attributes.CourseAttributes;
 import teammates.ui.controller.InstructorStudentListPageAction;
-import teammates.ui.controller.InstructorStudentListPageData;
+import teammates.ui.pagedata.InstructorStudentListPageData;
 
 /**
  * Serves as a datatransfer class between {@link InstructorStudentListPageAction}
@@ -13,7 +13,7 @@ public class InstructorStudentListPageCourseData {
     public CourseAttributes course;
     public boolean isCourseArchived;
     public boolean isInstructorAllowedToModify;
-    
+
     public InstructorStudentListPageCourseData(CourseAttributes course, boolean isCourseArchived,
                                         boolean isInstructorAllowedToModify) {
         this.course = course;

@@ -1,38 +1,28 @@
 package teammates.test.cases.browsertests;
 
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import teammates.common.datatransfer.DataBundle;
-import teammates.common.datatransfer.InstructorAttributes;
-import teammates.common.datatransfer.StudentAttributes;
+import teammates.common.datatransfer.attributes.InstructorAttributes;
+import teammates.common.datatransfer.attributes.StudentAttributes;
 import teammates.common.util.AppUrl;
 import teammates.common.util.Const;
-import teammates.test.pageobjects.Browser;
-import teammates.test.pageobjects.BrowserPool;
 import teammates.test.pageobjects.InstructorStudentRecordsPage;
 
 /**
  * Covers the 'student records' view for instructors.
  */
 public class InstructorStudentRecordsPageUiTest extends BaseUiTestCase {
-    private static Browser browser;
-    private static InstructorStudentRecordsPage viewPage;
-    private static DataBundle testDataNormal;
-    private static DataBundle testDataQuestionType;
+    private InstructorStudentRecordsPage viewPage;
 
-    private static String instructorId;
-    private static String courseId;
-    private static String studentEmail;
+    private String instructorId;
+    private String courseId;
+    private String studentEmail;
 
-    @BeforeClass
-    public void classSetup() {
-        printTestClassHeader();
-        testDataNormal = loadDataBundle("/InstructorStudentRecordsPageUiTest.json");
-        testDataQuestionType = loadDataBundle("/FeedbackSessionQuestionTypeTest.json");
-
-        browser = BrowserPool.getBrowser();
+    @Override
+    protected void prepareTestData() {
+        testData = loadDataBundle("/InstructorStudentRecordsPageUiTest.json");
+        removeAndRestoreDataBundle(testData);
     }
 
     @Test
@@ -51,10 +41,8 @@ public class InstructorStudentRecordsPageUiTest extends BaseUiTestCase {
 
         ______TS("content: typical case, normal student records with comments");
 
-        removeAndRestoreDataBundle(testDataNormal);
-
-        instructor = testDataNormal.instructors.get("teammates.test.CS2104");
-        student = testDataNormal.students.get("benny.c.tmms@ISR.CS2104");
+        instructor = testData.instructors.get("teammates.test.CS2104");
+        student = testData.students.get("benny.c.tmms@ISR.CS2104");
 
         instructorId = instructor.googleId;
         courseId = instructor.courseId;
@@ -66,7 +54,7 @@ public class InstructorStudentRecordsPageUiTest extends BaseUiTestCase {
 
         ______TS("content: typical case, normal student records with comments, helper view");
 
-        instructor = testDataNormal.instructors.get("teammates.test.CS2104.Helper");
+        instructor = testData.instructors.get("teammates.test.CS2104.Helper");
 
         instructorId = instructor.googleId;
         courseId = instructor.courseId;
@@ -77,8 +65,8 @@ public class InstructorStudentRecordsPageUiTest extends BaseUiTestCase {
 
         ______TS("content: normal student records with other instructor's comments, private feedback session");
 
-        instructor = testDataNormal.instructors.get("teammates.test.CS1101");
-        student = testDataNormal.students.get("teammates.test@ISR.CS1101");
+        instructor = testData.instructors.get("teammates.test.CS1101");
+        student = testData.students.get("teammates.test@ISR.CS1101");
 
         instructorId = instructor.googleId;
         courseId = instructor.courseId;
@@ -89,8 +77,8 @@ public class InstructorStudentRecordsPageUiTest extends BaseUiTestCase {
 
         ______TS("content: no student records, no profiles");
 
-        instructor = testDataNormal.instructors.get("teammates.noeval");
-        student = testDataNormal.students.get("alice.b.tmms@ISR.NoEval");
+        instructor = testData.instructors.get("teammates.noeval");
+        student = testData.students.get("alice.b.tmms@ISR.NoEval");
 
         instructorId = instructor.googleId;
         courseId = instructor.courseId;
@@ -101,6 +89,7 @@ public class InstructorStudentRecordsPageUiTest extends BaseUiTestCase {
 
         ______TS("content: multiple feedback session type student record");
 
+        DataBundle testDataQuestionType = loadDataBundle("/FeedbackSessionQuestionTypeTest.json");
         removeAndRestoreDataBundle(testDataQuestionType);
 
         instructor = testDataQuestionType.instructors.get("instructor1OfCourse1");
@@ -120,8 +109,8 @@ public class InstructorStudentRecordsPageUiTest extends BaseUiTestCase {
     }
 
     private void testScript() {
-        InstructorAttributes instructor = testDataNormal.instructors.get("teammates.test.CS2104");
-        StudentAttributes student = testDataNormal.students.get("benny.c.tmms@ISR.CS2104");
+        InstructorAttributes instructor = testData.instructors.get("teammates.test.CS2104");
+        StudentAttributes student = testData.students.get("benny.c.tmms@ISR.CS2104");
 
         instructorId = instructor.googleId;
         courseId = instructor.courseId;
@@ -135,43 +124,43 @@ public class InstructorStudentRecordsPageUiTest extends BaseUiTestCase {
         ______TS("edit comment button");
         viewPage.verifyEditCommentButtonClick(1);
     }
-    
+
     private void testVisibilityCheckboxScript() {
         viewPage.clickVisibilityOptionsButton(1);
-        
+
         ______TS("check giver when answer is unchecked");
-        
+
         viewPage.clickGiverCheckboxForCourse(1);
         assertTrue(viewPage.isAnswerCheckboxForCourseSelected(1));
         assertTrue(viewPage.isGiverCheckboxForCourseSelected(1));
         assertFalse(viewPage.isRecipientCheckboxForCourseSelected(1));
-        
+
         ______TS("uncheck answer when giver is checked");
-        
+
         viewPage.clickAnswerCheckboxForCourse(1);
         assertFalse(viewPage.isAnswerCheckboxForCourseSelected(1));
         assertFalse(viewPage.isGiverCheckboxForCourseSelected(1));
         assertFalse(viewPage.isRecipientCheckboxForCourseSelected(1));
-        
+
         ______TS("check recipient when answer is unchecked");
-        
+
         viewPage.clickRecipientCheckboxForCourse(1);
         assertTrue(viewPage.isAnswerCheckboxForCourseSelected(1));
         assertFalse(viewPage.isGiverCheckboxForCourseSelected(1));
         assertTrue(viewPage.isRecipientCheckboxForCourseSelected(1));
-        
+
         ______TS("uncheck answer when recipient is checked");
-        
+
         viewPage.clickAnswerCheckboxForCourse(1);
         assertFalse(viewPage.isAnswerCheckboxForCourseSelected(1));
         assertFalse(viewPage.isGiverCheckboxForCourseSelected(1));
         assertFalse(viewPage.isRecipientCheckboxForCourseSelected(1));
-        
+
         viewPage.clickVisibilityOptionsButton(1);
     }
 
     private void testAction() throws Exception {
-        
+
         ______TS("add comment: failure (empty comment)");
 
         viewPage.addComment("").verifyStatus("Please enter a valid comment. The comment can't be empty.");
@@ -183,7 +172,7 @@ public class InstructorStudentRecordsPageUiTest extends BaseUiTestCase {
                                             "New comment from teammates.test for Benny C"));
 
         ______TS("add comment with custom visibility: success");
-        
+
         viewPage.addCommentWithVisibility("New comment from teammates.test for Benny C, viewable by everyone", 4);
         viewPage.verifyHtmlMainContent("/instructorStudentRecordsPageAddComment.html");
 
@@ -194,9 +183,9 @@ public class InstructorStudentRecordsPageUiTest extends BaseUiTestCase {
         ______TS("delete comment: success");
 
         viewPage.clickDeleteCommentAndConfirm(1).verifyStatus("Comment deleted");
-        
+
         ______TS("edit comment then cancel: success");
-        
+
         viewPage.clickEditCommentAndCancel(1);
         viewPage.verifyCommentEditBoxNotVisible(1);
 
@@ -207,15 +196,15 @@ public class InstructorStudentRecordsPageUiTest extends BaseUiTestCase {
 
         // Edit back so that restoreDataBundle can identify and delete the comment.
         viewPage.editComment(2, "Comment 2 from ISR.CS2104 teammates.test Instructor to Benny");
-        
+
         ______TS("edit other instructor's comment: success");
-        
+
         viewPage.editComment(5, "Edited comment 2 from CS2104 teammates.test.Helper Instructor to Benny, "
                                 + "viewable by instructors")
                 .verifyStatus("Comment edited");
-        
+
         ______TS("delete other instructor's comment: success");
-        
+
         viewPage.clickDeleteCommentAndConfirm(5).verifyStatus("Comment deleted");
 
     }
@@ -225,7 +214,7 @@ public class InstructorStudentRecordsPageUiTest extends BaseUiTestCase {
                            .withUserId(instructorId)
                            .withCourseId(courseId)
                            .withStudentEmail(studentEmail);
-        return loginAdminToPage(browser, viewPageUrl, InstructorStudentRecordsPage.class);
+        return loginAdminToPage(viewPageUrl, InstructorStudentRecordsPage.class);
     }
 
     private void testPanelsCollapseExpand() {
@@ -239,11 +228,6 @@ public class InstructorStudentRecordsPageUiTest extends BaseUiTestCase {
         viewPage.clickAllRecordPanelHeadings();
         viewPage.waitForPanelsToExpand();
         assertTrue(viewPage.areRecordsVisible());
-    }
-
-    @AfterClass
-    public static void classTearDown() {
-        BrowserPool.release(browser);
     }
 
 }

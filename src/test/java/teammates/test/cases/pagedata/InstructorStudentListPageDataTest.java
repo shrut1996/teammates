@@ -5,12 +5,12 @@ import java.util.List;
 
 import org.testng.annotations.Test;
 
-import teammates.common.datatransfer.AccountAttributes;
-import teammates.common.datatransfer.CourseAttributes;
-import teammates.common.util.Sanitizer;
+import teammates.common.datatransfer.attributes.AccountAttributes;
+import teammates.common.datatransfer.attributes.CourseAttributes;
+import teammates.common.util.SanitizationHelper;
 import teammates.test.cases.BaseTestCase;
-import teammates.ui.controller.InstructorStudentListPageData;
 import teammates.ui.datatransfer.InstructorStudentListPageCourseData;
+import teammates.ui.pagedata.InstructorStudentListPageData;
 import teammates.ui.template.InstructorStudentListFilterBox;
 import teammates.ui.template.InstructorStudentListFilterCourse;
 import teammates.ui.template.InstructorStudentListSearchBox;
@@ -36,7 +36,7 @@ public class InstructorStudentListPageDataTest extends BaseTestCase {
         testFilterBox(islpd.getFilterBox());
         testStudentsTable(islpd.getStudentsTable());
         testNumOfCourses(islpd.getNumOfCourses());
-        
+
         islpd = initializeDataWithNoSearchKey();
         testNullSearchKeyHandler(islpd);
     }
@@ -59,15 +59,15 @@ public class InstructorStudentListPageDataTest extends BaseTestCase {
                                                                      isInstructorAllowedToModify));
         return new InstructorStudentListPageData(acct, searchKey, displayArchive, coursesToDisplay);
     }
-    
+
     private InstructorStudentListPageData initializeDataWithNoSearchKey() {
         searchKey = null;
         return new InstructorStudentListPageData(acct, searchKey, displayArchive, coursesToDisplay);
     }
-    
+
     private void testSearchBox(InstructorStudentListSearchBox searchBox) {
         assertEquals(acct.googleId, searchBox.getGoogleId());
-        assertEquals(Sanitizer.sanitizeForHtml(searchKey), searchBox.getSearchKey());
+        assertEquals(SanitizationHelper.sanitizeForHtml(searchKey), searchBox.getSearchKey());
         assertEquals(islpd.getInstructorSearchLink(), searchBox.getInstructorSearchLink());
     }
 

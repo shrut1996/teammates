@@ -1,6 +1,5 @@
 package teammates.test.cases.action;
 
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import teammates.common.util.Const;
@@ -9,20 +8,22 @@ import teammates.ui.controller.ShowPageResult;
 
 public class AdminAccountManagementPageActionTest extends BaseActionTest {
 
-    // private static final DataBundle = getTypicalDataBundle();
-    
-    @BeforeClass
-    public void classSetup() {
-        printTestClassHeader();
-        uri = Const.ActionURIs.ADMIN_ACCOUNT_MANAGEMENT_PAGE;
-        // removeAndRestoreTypicalDataInDatastore();
+    @Override
+    protected String getActionUri() {
+        return Const.ActionURIs.ADMIN_ACCOUNT_MANAGEMENT_PAGE;
     }
-    
+
+    @Override
+    protected void prepareTestData() {
+        // no test data used in this test
+    }
+
+    @Override
     @Test
     public void testExecuteAndPostProcess() {
-        
+
         ______TS("case: view admin acount management page");
-        
+
         String[] submissionParams = new String[] {
         };
 
@@ -30,17 +31,18 @@ public class AdminAccountManagementPageActionTest extends BaseActionTest {
         gaeSimulation.loginAsAdmin(adminUserId);
 
         AdminAccountManagementPageAction action = getAction(submissionParams);
-        ShowPageResult result = (ShowPageResult) action.executeAndPostProcess();
+        ShowPageResult result = getShowPageResult(action);
 
         assertEquals("", result.getStatusMessage());
         assertEquals("/jsp/adminAccountManagement.jsp?error=false&user=admin.user",
                      result.getDestinationWithParams());
         assertFalse(result.isError);
-                
+
     }
 
-    private AdminAccountManagementPageAction getAction(String... params) {
-        return (AdminAccountManagementPageAction) gaeSimulation.getActionObject(uri, params);
+    @Override
+    protected AdminAccountManagementPageAction getAction(String... params) {
+        return (AdminAccountManagementPageAction) gaeSimulation.getActionObject(getActionUri(), params);
     }
-    
+
 }

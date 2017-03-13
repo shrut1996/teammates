@@ -6,116 +6,106 @@ import java.util.List;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import teammates.common.datatransfer.DataBundle;
-import teammates.common.datatransfer.InstructorAttributes;
-import teammates.common.datatransfer.StudentAttributes;
+import teammates.common.datatransfer.attributes.InstructorAttributes;
+import teammates.common.datatransfer.attributes.StudentAttributes;
 import teammates.common.util.AppUrl;
 import teammates.common.util.Const;
 import teammates.common.util.StringHelper;
 import teammates.test.pageobjects.AdminSearchPage;
-import teammates.test.pageobjects.Browser;
-import teammates.test.pageobjects.BrowserPool;
 
 public class AdminSearchPageUiTest extends BaseUiTestCase {
     public static final int ADMIN_SEARCH_INSTRUCTOR_TABLE_NUM_COLUMNS = 5;
     public static final int ADMIN_SEARCH_STUDENT_TABLE_NUM_COLUMNS = 6;
-    
-    private static Browser browser;
-    private static AdminSearchPage searchPage;
-    private static DataBundle testData;
 
-    @BeforeClass
-    public void classSetup() {
-        printTestClassHeader();
+    private AdminSearchPage searchPage;
+
+    @Override
+    protected void prepareTestData() {
         testData = loadDataBundle("/InstructorSearchPageUiTest.json");
         removeAndRestoreDataBundle(testData);
         putDocuments(testData);
-        browser = BrowserPool.getBrowser();
     }
-    
+
     @Test
     public void allTests() {
         testContent();
         testSearch();
     }
-    
+
     private void testContent() {
-        
+
         ______TS("content: default search page");
-        
+
         searchPage = getAdminSearchPage();
-        
+
         assertTrue(isPageTitleCorrect());
         assertTrue(isSearchPanelPresent());
     }
 
     private void testSearch() {
-        
+
         ______TS("search for nothing");
-        
+
         String searchContent = "";
         searchPage.inputSearchContent(searchContent);
         searchPage.clickSearchButton();
-        
+
         assertTrue(isPageTitleCorrect());
         assertTrue(isSearchPanelPresent());
         searchPage.verifyStatus("Search key cannot be empty");
-        
+
         ______TS("search for student1");
-        
+
         searchPage.clearSearchBox();
         searchContent = "student1";
         searchPage.inputSearchContent(searchContent);
         searchPage.clickSearchButton();
-        
+
         assertTrue(isSearchPanelPresent());
         assertTrue(isSearchDataDisplayCorrect());
-        
+
         StudentAttributes student = testData.students.get("student1InCourse1");
         InstructorAttributes instructor = testData.instructors.get("instructor1OfCourse1");
         assertTrue(isStudentRowDisplayed(student, instructor));
-        
+
         ______TS("search for student1 email");
-        
+
         searchPage.clearSearchBox();
         searchContent = "searchUI.student1InCourse1@gmail.tmt";
         searchPage.inputSearchContent(searchContent);
         searchPage.clickSearchButton();
-        
+
         assertTrue(isSearchPanelPresent());
         assertTrue(isSearchDataDisplayCorrect());
         searchPage.verifyStatus("Total results found: 1");
-        
+
         ______TS("search for student name with special characters");
-        
+
         searchPage.clearSearchBox();
         searchContent = "student(1)";
         searchPage.inputSearchContent(searchContent);
         searchPage.clickSearchButton();
-        
+
         assertTrue(isSearchPanelPresent());
         assertTrue(isSearchDataDisplayCorrect());
     }
 
     private AdminSearchPage getAdminSearchPage() {
-        AppUrl commentsPageUrl = createUrl(Const.ActionURIs.ADMIN_SEARCH_PAGE);
-
-        return loginAdminToPage(browser, commentsPageUrl, AdminSearchPage.class);
+        AppUrl searchPageUrl = createUrl(Const.ActionURIs.ADMIN_SEARCH_PAGE);
+        return loginAdminToPage(searchPageUrl, AdminSearchPage.class);
     }
-    
+
     private boolean isPageTitleCorrect() {
         return "Admin Search".equals(searchPage.getPageTitle());
     }
-    
+
     private boolean isSearchPanelPresent() {
         return searchPage.isElementPresent(By.id("filterQuery"))
             && searchPage.isElementPresent(By.id("searchButton"));
     }
-    
+
     /**
      * This method only checks if the search data tables are displayed correctly
      * i.e, table headers are correct, and appropriate message is displayed if no
@@ -134,15 +124,15 @@ public class AdminSearchPageUiTest extends BaseUiTestCase {
         }
         searchPage.verifyStatus("No result found, please try again");
         return true;
-        
+
     }
-    
+
     private boolean isSearchTableHeaderCorrect(int tableNum) {
         List<String> expectedSearchTableHeaders;
         List<String> actualSessionTableHeaders;
 
         int numColumns = searchPage.getNumberOfColumnsFromDataTable(tableNum);
-        
+
         switch (searchPage.getDataTableId(tableNum)) {
         // Instructor table
         case "search_table_instructor":
@@ -155,13 +145,13 @@ public class AdminSearchPageUiTest extends BaseUiTestCase {
                                                        "Institute",
                                                        "Options");
             actualSessionTableHeaders = new ArrayList<String>();
-            
+
             for (int i = 0; i < numColumns; i++) {
                 actualSessionTableHeaders.add(searchPage.getHeaderValueFromDataTable(tableNum, 0, i));
             }
-            
+
             break;
-            
+
         // Student table
         case "search_table":
             if (numColumns != ADMIN_SEARCH_STUDENT_TABLE_NUM_COLUMNS) {
@@ -177,13 +167,13 @@ public class AdminSearchPageUiTest extends BaseUiTestCase {
             for (int i = 0; i < numColumns; i++) {
                 actualSessionTableHeaders.add(searchPage.getHeaderValueFromDataTable(tableNum, 0, i));
             }
-            
+
             break;
-            
+
         default:
             return false;
         }
-        
+
         return actualSessionTableHeaders.equals(expectedSearchTableHeaders);
     }
 
@@ -200,17 +190,17 @@ public class AdminSearchPageUiTest extends BaseUiTestCase {
 
         By by = By.xpath("//table[@id = 'search_table']/tbody/tr[@class='studentRow']");
         List<WebElement> studentRows = browser.driver.findElements(by);
-        
+
         for (WebElement studentRow : studentRows) {
-            
+
             boolean isStudentCorrect = isStudentContentCorrect(studentRow, student)
                                        && isStudentLinkCorrect(studentRow, student, instructorToMasquaradeAs);
-           
+
             if (isStudentCorrect) {
                 return true;
             }
         }
-        
+
         return false;
     }
 
@@ -278,8 +268,4 @@ public class AdminSearchPageUiTest extends BaseUiTestCase {
         return actualNameLink.equals(expectedNameLink);
     }
 
-    @AfterClass
-    public static void classTearDown() {
-        BrowserPool.release(browser);
-    }
 }

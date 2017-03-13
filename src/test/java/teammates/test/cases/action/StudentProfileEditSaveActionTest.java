@@ -3,12 +3,10 @@ package teammates.test.cases.action;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import teammates.common.datatransfer.AccountAttributes;
-import teammates.common.datatransfer.DataBundle;
-import teammates.common.datatransfer.StudentProfileAttributes;
+import teammates.common.datatransfer.attributes.AccountAttributes;
+import teammates.common.datatransfer.attributes.StudentProfileAttributes;
 import teammates.common.util.Const;
 import teammates.common.util.FieldValidator;
 import teammates.common.util.StringHelper;
@@ -18,19 +16,16 @@ import teammates.ui.controller.StudentProfileEditSaveAction;
 
 public class StudentProfileEditSaveActionTest extends BaseActionTest {
 
-    private final DataBundle dataBundle = getTypicalDataBundle();
-    
-    @BeforeClass
-    public void classSetup() {
-        printTestClassHeader();
-        removeAndRestoreTypicalDataBundle();
-        uri = Const.ActionURIs.STUDENT_PROFILE_EDIT_SAVE;
+    @Override
+    protected String getActionUri() {
+        return Const.ActionURIs.STUDENT_PROFILE_EDIT_SAVE;
     }
-    
+
+    @Override
     @Test
     public void testExecuteAndPostProcess() throws Exception {
         AccountAttributes student = dataBundle.accounts.get("student1InCourse1");
-        
+
         testActionWithInvalidParameters(student);
         testActionTypicalSuccess(student);
         testActionInMasqueradeMode(student);
@@ -39,20 +34,20 @@ public class StudentProfileEditSaveActionTest extends BaseActionTest {
     private void testActionWithInvalidParameters(AccountAttributes student) throws Exception {
         gaeSimulation.loginAsStudent(student.googleId);
         ______TS("Failure case: invalid parameters");
-        
+
         String[] submissionParams = createInvalidParamsForProfile();
         StudentProfileAttributes expectedProfile = getProfileAttributesFrom(submissionParams);
         expectedProfile.googleId = student.googleId;
-        
+
         StudentProfileEditSaveAction action = getAction(submissionParams);
-        RedirectResult result = (RedirectResult) action.executeAndPostProcess();
-        
+        RedirectResult result = getRedirectResult(action);
+
         assertTrue(result.isError);
         AssertHelper.assertContains(Const.ActionURIs.STUDENT_PROFILE_PAGE
                                     + "?error=true&user=" + student.googleId,
                                     result.getDestinationWithParams());
         List<String> expectedErrorMessages = new ArrayList<String>();
-        
+
         expectedErrorMessages.add(
                 getPopulatedErrorMessage(FieldValidator.INVALID_NAME_ERROR_MESSAGE, submissionParams[1],
                                          FieldValidator.PERSON_NAME_FIELD_NAME,
@@ -63,9 +58,9 @@ public class StudentProfileEditSaveActionTest extends BaseActionTest {
                                          FieldValidator.EMAIL_FIELD_NAME,
                                          FieldValidator.REASON_INCORRECT_FORMAT,
                                          FieldValidator.EMAIL_MAX_LENGTH));
-        
+
         AssertHelper.assertContains(expectedErrorMessages, result.getStatusMessage());
-        
+
         String expectedLogMessage = "TEAMMATESLOG|||studentProfileEditSave|||studentProfileEditSave"
                                   + "|||true|||Student|||" + student.name + "|||" + student.googleId
                                   + "|||" + student.email + "|||" + Const.ACTION_RESULT_FAILURE
@@ -77,18 +72,18 @@ public class StudentProfileEditSaveActionTest extends BaseActionTest {
         String[] submissionParams = createValidParamsForProfile();
         StudentProfileAttributes expectedProfile = getProfileAttributesFrom(submissionParams);
         gaeSimulation.loginAsStudent(student.googleId);
-        
+
         ______TS("Typical case");
-        
+
         StudentProfileEditSaveAction action = getAction(submissionParams);
-        RedirectResult result = (RedirectResult) action.executeAndPostProcess();
+        RedirectResult result = getRedirectResult(action);
         expectedProfile.googleId = student.googleId;
-        
+
         assertFalse(result.isError);
         AssertHelper.assertContains(Const.ActionURIs.STUDENT_PROFILE_PAGE + "?error=false&user=" + student.googleId,
                                     result.getDestinationWithParams());
         assertEquals(Const.StatusMessages.STUDENT_PROFILE_EDITED, result.getStatusMessage());
-        
+
         verifyLogMessage(student, action, expectedProfile, false);
     }
 
@@ -96,22 +91,21 @@ public class StudentProfileEditSaveActionTest extends BaseActionTest {
 
         ______TS("Typical case: masquerade mode");
         gaeSimulation.loginAsAdmin("admin.user");
-        
+
         String[] submissionParams = createValidParamsForProfile();
         StudentProfileAttributes expectedProfile = getProfileAttributesFrom(submissionParams);
         expectedProfile.googleId = student.googleId;
-        
+
         StudentProfileEditSaveAction action = getAction(addUserIdToParams(student.googleId, submissionParams));
-        RedirectResult result = (RedirectResult) action.executeAndPostProcess();
-        
+        RedirectResult result = getRedirectResult(action);
+
         assertFalse(result.isError);
         assertEquals(Const.StatusMessages.STUDENT_PROFILE_EDITED, result.getStatusMessage());
         AssertHelper.assertContains(Const.ActionURIs.STUDENT_PROFILE_PAGE + "?error=false&user=" + student.googleId,
                                     result.getDestinationWithParams());
         verifyLogMessage(student, action, expectedProfile, true);
     }
-    
-    
+
     //-------------------------------------------------------------------------------------------------------
     //-------------------------------------- Helper Functions -----------------------------------------------
     //-------------------------------------------------------------------------------------------------------
@@ -131,7 +125,7 @@ public class StudentProfileEditSaveActionTest extends BaseActionTest {
     private StudentProfileAttributes getProfileAttributesFrom(
             String[] submissionParams) {
         StudentProfileAttributes spa = new StudentProfileAttributes();
-        
+
         spa.shortName = StringHelper.trimIfNotNull(submissionParams[1]);
         spa.email = StringHelper.trimIfNotNull(submissionParams[3]);
         spa.institute = StringHelper.trimIfNotNull(submissionParams[5]);
@@ -139,12 +133,13 @@ public class StudentProfileEditSaveActionTest extends BaseActionTest {
         spa.gender = StringHelper.trimIfNotNull(submissionParams[9]);
         spa.moreInfo = StringHelper.trimIfNotNull(submissionParams[11]);
         spa.modifiedDate = null;
-        
+
         return spa;
     }
 
-    private StudentProfileEditSaveAction getAction(String[] submissionParams) {
-        return (StudentProfileEditSaveAction) gaeSimulation.getActionObject(uri, submissionParams);
+    @Override
+    protected StudentProfileEditSaveAction getAction(String... params) {
+        return (StudentProfileEditSaveAction) gaeSimulation.getActionObject(getActionUri(), params);
     }
 
 }

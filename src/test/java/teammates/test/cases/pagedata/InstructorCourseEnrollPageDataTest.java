@@ -1,21 +1,15 @@
 package teammates.test.cases.pagedata;
 
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import teammates.common.datatransfer.AccountAttributes;
+import teammates.common.datatransfer.attributes.AccountAttributes;
 import teammates.common.datatransfer.DataBundle;
 import teammates.test.cases.BaseTestCase;
-import teammates.ui.controller.InstructorCourseEnrollPageData;
+import teammates.ui.pagedata.InstructorCourseEnrollPageData;
 
 public class InstructorCourseEnrollPageDataTest extends BaseTestCase {
     private static DataBundle dataBundle = getTypicalDataBundle();
-    
-    @BeforeClass
-    public static void classSetUp() {
-        printTestClassHeader();
-    }
-    
+
     @Test
     public void testAll() {
         ______TS("test typical case");
@@ -26,15 +20,15 @@ public class InstructorCourseEnrollPageDataTest extends BaseTestCase {
                       + "Tut Group 1 | Team 1 | Jean Wong | jean@email.com | Exchange Student\n"
                       + "Tut Group 1 | Team 2 | Jack Wayne | jack@email.com\n"
                       + "Tut Group 2 | Team 3 | Thora Parker | thora@email.com";
-        
+
         InstructorCourseEnrollPageData pageData = new InstructorCourseEnrollPageData(account, courseId, enroll);
-        
+
         assertNotNull(pageData.getCourseId());
         assertEquals(courseId, pageData.getCourseId());
-        
+
         assertNotNull(pageData.getEnrollStudents());
         assertEquals(enroll, pageData.getEnrollStudents());
-        
+
         assertNotNull(pageData.account);
         assertEquals(account.googleId, pageData.account.googleId);
     }

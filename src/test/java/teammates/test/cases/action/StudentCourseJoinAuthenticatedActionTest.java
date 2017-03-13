@@ -3,9 +3,9 @@ package teammates.test.cases.action;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import teammates.common.datatransfer.AccountAttributes;
+import teammates.common.datatransfer.attributes.AccountAttributes;
 import teammates.common.datatransfer.DataBundle;
-import teammates.common.datatransfer.StudentAttributes;
+import teammates.common.datatransfer.attributes.StudentAttributes;
 import teammates.common.exception.UnauthorizedAccessException;
 import teammates.common.util.Const;
 import teammates.common.util.StringHelper;
@@ -15,22 +15,25 @@ import teammates.ui.controller.RedirectResult;
 import teammates.ui.controller.StudentCourseJoinAuthenticatedAction;
 
 public class StudentCourseJoinAuthenticatedActionTest extends BaseActionTest {
-    private static DataBundle dataBundle = loadDataBundle("/StudentCourseJoinAuthenticatedTest.json");
+    private DataBundle dataBundle = loadDataBundle("/StudentCourseJoinAuthenticatedTest.json");
+
+    @Override
+    protected String getActionUri() {
+        return Const.ActionURIs.STUDENT_COURSE_JOIN_AUTHENTICATED;
+    }
 
     @BeforeClass
     public void classSetup() {
-        printTestClassHeader();
-        
+        // extra test data used on top of typical data bundle
         removeAndRestoreDataBundle(dataBundle);
-        
-        uri = Const.ActionURIs.STUDENT_COURSE_JOIN_AUTHENTICATED;
     }
 
+    @Override
     @Test
     public void testExecuteAndPostProcess() throws Exception {
         StudentsDb studentsDb = new StudentsDb();
         AccountsDb accountsDb = new AccountsDb();
-        
+
         StudentAttributes student1InCourse1 = dataBundle.students
                 .get("student1InCourse1");
         student1InCourse1 = studentsDb.getStudentForGoogleId(
@@ -159,9 +162,8 @@ public class StudentCourseJoinAuthenticatedActionTest extends BaseActionTest {
         assertFalse(studentWithoutProfilePicture.studentProfile.moreInfo.isEmpty());
         assertFalse(studentWithoutProfilePicture.studentProfile.email.isEmpty());
 
-        
         StudentAttributes studentWithoutProfilePictureAttributes = dataBundle.students.get("noFSStudentWithPartialProfile");
-        
+
         studentWithoutProfilePictureAttributes = studentsDb.getStudentForEmail(
                 studentWithoutProfilePictureAttributes.course, studentWithoutProfilePictureAttributes.email);
 
@@ -193,7 +195,7 @@ public class StudentCourseJoinAuthenticatedActionTest extends BaseActionTest {
 
         ______TS("join course with no feedback sessions, profile has no missing field");
         AccountAttributes studentWithFullProfile = dataBundle.accounts.get("noFSStudent3");
-        
+
         studentWithFullProfile = accountsDb.getAccount(studentWithFullProfile.googleId, true);
         assertNotNull(studentWithFullProfile.studentProfile);
         assertFalse(studentWithFullProfile.studentProfile.pictureKey.isEmpty());
@@ -202,7 +204,6 @@ public class StudentCourseJoinAuthenticatedActionTest extends BaseActionTest {
         assertFalse(studentWithoutProfilePicture.studentProfile.moreInfo.isEmpty());
         assertFalse(studentWithoutProfilePicture.studentProfile.email.isEmpty());
 
-        
         StudentAttributes studentWithFullProfileAttributes = dataBundle.students.get("noFSStudentWithFullProfile");
         studentWithFullProfileAttributes = studentsDb.getStudentForEmail(
                 studentWithFullProfileAttributes.course, studentWithFullProfileAttributes.email);
@@ -231,7 +232,6 @@ public class StudentCourseJoinAuthenticatedActionTest extends BaseActionTest {
                                 "[idOfCourseNoEvals] Typical Course 3 with 0 Evals"),
                 redirectResult.getStatusMessage());
 
-        
         ______TS("typical case");
 
         AccountAttributes newStudentAccount = new AccountAttributes(
@@ -272,7 +272,8 @@ public class StudentCourseJoinAuthenticatedActionTest extends BaseActionTest {
 
     }
 
-    private StudentCourseJoinAuthenticatedAction getAction(String... params) {
-        return (StudentCourseJoinAuthenticatedAction) gaeSimulation.getActionObject(uri, params);
+    @Override
+    protected StudentCourseJoinAuthenticatedAction getAction(String... params) {
+        return (StudentCourseJoinAuthenticatedAction) gaeSimulation.getActionObject(getActionUri(), params);
     }
 }

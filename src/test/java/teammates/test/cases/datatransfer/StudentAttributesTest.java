@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import teammates.common.datatransfer.StudentAttributes;
+import teammates.common.datatransfer.attributes.StudentAttributes;
 import teammates.common.datatransfer.StudentUpdateStatus;
 import teammates.common.util.Config;
 import teammates.common.util.Const;
@@ -20,41 +18,36 @@ import teammates.test.cases.BaseTestCase;
 public class StudentAttributesTest extends BaseTestCase {
 
     private static class StudentAttributesWithModifiableTimestamp extends StudentAttributes {
-        
+
         private void setCreatedAt(Date createdAt) {
             this.createdAt = createdAt;
         }
-        
+
         private void setUpdatedAt(Date updatedAt) {
             this.updatedAt = updatedAt;
         }
-        
-    }
-    
-    @BeforeClass
-    public static void setupClass() {
-        printTestClassHeader();
+
     }
 
     @Test
     public void testDefaultTimestamp() {
-        
+
         StudentAttributesWithModifiableTimestamp s = new StudentAttributesWithModifiableTimestamp();
-        
+
         s.setCreatedAt(null);
         s.setUpdatedAt(null);
-        
+
         Date defaultStudentCreationTimeStamp = Const.TIME_REPRESENTS_DEFAULT_TIMESTAMP;
-        
+
         ______TS("success : defaultTimeStamp for createdAt date");
-        
+
         assertEquals(defaultStudentCreationTimeStamp, s.getCreatedAt());
-        
+
         ______TS("success : defaultTimeStamp for updatedAt date");
-        
+
         assertEquals(defaultStudentCreationTimeStamp, s.getUpdatedAt());
     }
-    
+
     @Test
     public void testUpdateStatusEnum() {
         assertEquals(StudentUpdateStatus.ERROR, StudentUpdateStatus.enumRepresentation(0));
@@ -86,7 +79,6 @@ public class StudentAttributesTest extends BaseTestCase {
                                                  "courseId1", "team 1", "section 1");
 
         verifyStudentContentIncludingId(expected, (CourseStudent) studentUnderTest.toEntity());
-
 
         ______TS("Typical case: initialize from entity");
         expected = generateTypicalStudentObject();
@@ -401,12 +393,12 @@ public class StudentAttributesTest extends BaseTestCase {
         assertEquals(expected.getEmail(), actual.getEmail());
         assertEquals(expected.getComments(), actual.getComments());
     }
-    
+
     private void verifyStudentContentIncludingId(CourseStudent expected, CourseStudent actual) {
         verifyStudentContent(expected, actual);
         assertEquals(expected.getGoogleId(), actual.getGoogleId());
     }
-    
+
     private StudentAttributes generateValidStudentAttributesObject() {
         StudentAttributes s = new StudentAttributes();
         s.googleId = "valid.google.id";
@@ -417,11 +409,6 @@ public class StudentAttributesTest extends BaseTestCase {
         s.team = "valid team";
         s.section = "valid section";
         return s;
-    }
-
-    @AfterClass
-    public static void tearDown() {
-        printTestClassFooter();
     }
 
 }

@@ -1,12 +1,12 @@
 package teammates.ui.controller;
 
-import teammates.common.datatransfer.FeedbackSessionAttributes;
+import teammates.common.datatransfer.attributes.FeedbackSessionAttributes;
 import teammates.common.datatransfer.FeedbackSessionQuestionsBundle;
-import teammates.common.datatransfer.StudentAttributes;
+import teammates.common.datatransfer.attributes.StudentAttributes;
 import teammates.common.exception.EntityDoesNotExistException;
 import teammates.common.exception.InvalidParametersException;
 import teammates.common.util.Const;
-import teammates.common.util.StringHelper;
+import teammates.common.util.SanitizationHelper;
 
 public class StudentFeedbackSubmissionEditSaveAction extends FeedbackSubmissionEditSaveAction {
     @Override
@@ -36,10 +36,10 @@ public class StudentFeedbackSubmissionEditSaveAction extends FeedbackSubmissionE
     protected String getUserEmailForCourse() {
         return getStudent().email;
     }
-    
+
     @Override
     protected String getUserTeamForCourse() {
-        return StringHelper.recoverFromSanitizedText(getStudent().team);
+        return SanitizationHelper.desanitizeFromHtml(getStudent().team);
     }
 
     @Override
@@ -82,7 +82,7 @@ public class StudentFeedbackSubmissionEditSaveAction extends FeedbackSubmissionE
 
             return result;
         }
-        
+
         // Return to student home page if there is no error and user is registered
         return createRedirectResult(Const.ActionURIs.STUDENT_HOME_PAGE);
     }

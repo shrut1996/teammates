@@ -47,18 +47,20 @@ public class ControllerServlet extends HttpServlet {
     @SuppressWarnings("PMD.AvoidCatchingThrowable") // used as fallback
     public final void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
+        UserType userType = new GateKeeper().getCurrentUser();
+
         try {
             /* We are using the Template Method Design Pattern here.
-             * This method contains the high level logic of the the request processing.
+             * This method contains the high level logic of the request processing.
              * Concrete details of the processing steps are to be implemented by child
              * classes, based on request-specific needs.
              */
             long startTime = System.currentTimeMillis();
-            
+
             log.info("Request received : [" + req.getMethod() + "] " + req.getRequestURL().toString()
                     + ":" + HttpRequestHelper.printRequestParameters(req));
             log.info("User agent : " + req.getHeader("User-Agent"));
-            
+
             Action c = new ActionFactory().getAction(req);
             if (c.isValidUser()) {
                 ActionResult actionResult = c.executeAndPostProcess();
@@ -66,29 +68,29 @@ public class ControllerServlet extends HttpServlet {
             } else {
                 resp.sendRedirect(c.getAuthenticationRedirectUrl());
             }
-            
+
             long timeTaken = System.currentTimeMillis() - startTime;
             // This is the log message that is used to generate the 'activity log' for the admin.
-            
+
             log.info(c.getLogMessage() + "|||" + timeTaken);
-            
+
         } catch (PageNotFoundException e) {
-            log.warning(ActivityLogEntry.generateServletActionFailureLogMessage(req, e));
+            log.warning(ActivityLogEntry.generateServletActionFailureLogMessage(req, e, userType));
             cleanUpStatusMessageInSession(req);
             resp.sendRedirect(Const.ViewURIs.ACTION_NOT_FOUND_PAGE);
         } catch (EntityNotFoundException e) {
-            log.warning(ActivityLogEntry.generateServletActionFailureLogMessage(req, e));
+            log.warning(ActivityLogEntry.generateServletActionFailureLogMessage(req, e, userType));
             cleanUpStatusMessageInSession(req);
             resp.sendRedirect(Const.ViewURIs.ENTITY_NOT_FOUND_PAGE);
 
         } catch (FeedbackSessionNotVisibleException e) {
-            log.warning(ActivityLogEntry.generateServletActionFailureLogMessage(req, e));
+            log.warning(ActivityLogEntry.generateServletActionFailureLogMessage(req, e, userType));
             cleanUpStatusMessageInSession(req);
             req.getSession().setAttribute(Const.ParamsNames.FEEDBACK_SESSION_NOT_VISIBLE, e.getStartTimeString());
             resp.sendRedirect(Const.ViewURIs.FEEDBACK_SESSION_NOT_VISIBLE);
-            
+
         } catch (UnauthorizedAccessException e) {
-            log.warning(ActivityLogEntry.generateServletActionFailureLogMessage(req, e));
+            log.warning(ActivityLogEntry.generateServletActionFailureLogMessage(req, e, userType));
             cleanUpStatusMessageInSession(req);
             resp.sendRedirect(Const.ViewURIs.UNAUTHORIZED);
 
@@ -105,12 +107,12 @@ public class ControllerServlet extends HttpServlet {
             String requestUrl = req.getRequestURL().toString();
             log.info(e.getMessage());
             cleanUpStatusMessageInSession(req);
-            
+
             List<StatusMessage> statusMessagesToUser = new ArrayList<StatusMessage>();
             statusMessagesToUser.add(new StatusMessage(Const.StatusMessages.NULL_POST_PARAMETER_MESSAGE,
                                                        StatusMessageColor.WARNING));
             req.getSession().setAttribute(Const.ParamsNames.STATUS_MESSAGES_LIST, statusMessagesToUser);
-            
+
             if (requestUrl.contains("/instructor")) {
                 resp.sendRedirect(Const.ActionURIs.INSTRUCTOR_HOME_PAGE);
             } else if (requestUrl.contains("/student")) {
@@ -127,22 +129,19 @@ public class ControllerServlet extends HttpServlet {
             String requestPath = req.getServletPath();
             String requestUrl = req.getRequestURL().toString();
             String requestParams = HttpRequestHelper.printRequestParameters(req);
-            UserType userType = new GateKeeper().getCurrentUser();
-            
+
             EmailWrapper errorReport =
                     new EmailGenerator().generateSystemErrorEmail(requestMethod, requestUserAgent, requestPath,
                                                                   requestUrl, requestParams, userType, t);
             new EmailSender().sendReport(errorReport);
-            if (errorReport != null) {
-                log.severe(ActivityLogEntry.generateSystemErrorReportLogMessage(req, errorReport));
-            }
-            
+            log.severe(ActivityLogEntry.generateSystemErrorReportLogMessage(req, errorReport, userType));
+
             cleanUpStatusMessageInSession(req);
             resp.sendRedirect(Const.ViewURIs.ERROR_PAGE);
         }
-        
+
     }
-    
+
     private void cleanUpStatusMessageInSession(HttpServletRequest req) {
         req.getSession().removeAttribute(Const.ParamsNames.STATUS_MESSAGES_LIST);
     }

@@ -1,27 +1,22 @@
 package teammates.test.cases.action;
 
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import teammates.common.datatransfer.DataBundle;
-import teammates.common.datatransfer.InstructorAttributes;
+import teammates.common.datatransfer.attributes.InstructorAttributes;
 import teammates.common.util.Const;
 import teammates.test.driver.AssertHelper;
 import teammates.ui.controller.InstructorCourseEnrollPageAction;
-import teammates.ui.controller.InstructorCourseEnrollPageData;
 import teammates.ui.controller.ShowPageResult;
+import teammates.ui.pagedata.InstructorCourseEnrollPageData;
 
 public class InstructorCourseEnrollPageActionTest extends BaseActionTest {
 
-    private final DataBundle dataBundle = getTypicalDataBundle();
-    
-    @BeforeClass
-    public void classSetup() {
-        printTestClassHeader();
-        removeAndRestoreTypicalDataBundle();
-        uri = Const.ActionURIs.INSTRUCTOR_COURSE_ENROLL_PAGE;
+    @Override
+    protected String getActionUri() {
+        return Const.ActionURIs.INSTRUCTOR_COURSE_ENROLL_PAGE;
     }
-    
+
+    @Override
     @Test
     public void testExecuteAndPostProcess() {
         visitEnrollPage_withInvalidRequestParams_throwsException();
@@ -50,7 +45,7 @@ public class InstructorCourseEnrollPageActionTest extends BaseActionTest {
                 Const.ParamsNames.COURSE_ID, courseId
         };
         InstructorCourseEnrollPageAction enrollPageAction = getAction(submissionParams);
-        
+
         ShowPageResult pageResult = getShowPageResult(enrollPageAction);
         assertEquals(Const.ViewURIs.INSTRUCTOR_COURSE_ENROLL + "?error=false&user=idOfInstructor4",
                      pageResult.getDestinationWithParams());
@@ -113,7 +108,7 @@ public class InstructorCourseEnrollPageActionTest extends BaseActionTest {
                      pageResult.getDestinationWithParams());
         assertFalse(pageResult.isError);
         assertEquals("", pageResult.getStatusMessage());
-        
+
         InstructorCourseEnrollPageData pageData = (InstructorCourseEnrollPageData) pageResult.data;
         assertEquals(courseId, pageData.getCourseId());
         assertEquals(null, pageData.getEnrollStudents());
@@ -123,7 +118,8 @@ public class InstructorCourseEnrollPageActionTest extends BaseActionTest {
         AssertHelper.assertContains(expectedLogSegment, enrollPageAction.getLogMessage());
     }
 
-    private InstructorCourseEnrollPageAction getAction(String... params) {
-        return (InstructorCourseEnrollPageAction) gaeSimulation.getActionObject(uri, params);
+    @Override
+    protected InstructorCourseEnrollPageAction getAction(String... params) {
+        return (InstructorCourseEnrollPageAction) gaeSimulation.getActionObject(getActionUri(), params);
     }
 }

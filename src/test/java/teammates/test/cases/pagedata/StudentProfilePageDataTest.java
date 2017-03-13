@@ -2,12 +2,12 @@ package teammates.test.cases.pagedata;
 
 import org.testng.annotations.Test;
 
-import teammates.common.datatransfer.AccountAttributes;
-import teammates.common.datatransfer.StudentProfileAttributes;
+import teammates.common.datatransfer.attributes.AccountAttributes;
+import teammates.common.datatransfer.attributes.StudentProfileAttributes;
 import teammates.common.util.Const;
 import teammates.common.util.StringHelper;
 import teammates.test.cases.BaseTestCase;
-import teammates.ui.controller.StudentProfilePageData;
+import teammates.ui.pagedata.StudentProfilePageData;
 import teammates.ui.template.StudentProfileEditBox;
 import teammates.ui.template.StudentProfileUploadPhotoModal;
 
@@ -48,14 +48,14 @@ public class StudentProfilePageDataTest extends BaseTestCase {
                    + "&" + Const.ParamsNames.USER_ID + "=" + acct.googleId;
         return new StudentProfilePageData(acct, isEditingPhoto);
     }
-    
+
     private StudentProfilePageData initializeDataWithNoPictureKeyAndNullFields() {
         spa = new StudentProfileAttributes("valid.id.2", null, null, null, null, "male", null, "");
         acct = new AccountAttributes("valid.id", "full name", false, "e@mail1.com", "inst", spa);
         pictureUrl = Const.SystemParams.DEFAULT_PROFILE_PICTURE_PATH;
         return new StudentProfilePageData(acct, isEditingPhoto);
     }
-    
+
     private void testProfileEditBox(StudentProfileEditBox profileEditBox) {
         assertEquals(acct.name, profileEditBox.getName());
         assertEquals(isEditingPhoto, profileEditBox.getEditingPhoto());
@@ -82,5 +82,5 @@ public class StudentProfilePageDataTest extends BaseTestCase {
         assertEquals(pictureUrl, uploadPhotoModal.getPictureUrl());
         assertEquals(spa.pictureKey, uploadPhotoModal.getPictureKey());
     }
-    
+
 }

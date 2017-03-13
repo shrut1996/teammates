@@ -1,8 +1,8 @@
 package teammates.ui.controller;
 
-import teammates.common.datatransfer.CommentAttributes;
+import teammates.common.datatransfer.attributes.CommentAttributes;
 import teammates.common.datatransfer.CommentSendingState;
-import teammates.common.datatransfer.FeedbackResponseCommentAttributes;
+import teammates.common.datatransfer.attributes.FeedbackResponseCommentAttributes;
 import teammates.common.exception.EntityDoesNotExistException;
 import teammates.common.util.Assumption;
 import teammates.common.util.Config;
@@ -10,6 +10,7 @@ import teammates.common.util.Const;
 import teammates.common.util.StatusMessage;
 import teammates.common.util.StatusMessageColor;
 import teammates.common.util.ThreadHelper;
+import teammates.ui.pagedata.PageData;
 
 /**
  * Action: Clear pending {@link CommentAttributes} and {@link FeedbackResponseCommentAttributes},
@@ -21,15 +22,15 @@ public class InstructorStudentCommentClearPendingAction extends Action {
     protected ActionResult execute() throws EntityDoesNotExistException {
         String courseId = getRequestParamValue(Const.ParamsNames.COURSE_ID);
         Assumption.assertNotNull(courseId);
-        
+
         gateKeeper.verifyAccessible(
                 logic.getInstructorForGoogleId(courseId, account.googleId),
                 logic.getCourse(courseId));
-        
+
         logic.updateCommentsSendingState(courseId, CommentSendingState.PENDING, CommentSendingState.SENDING);
         logic.updateFeedbackResponseCommentsSendingState(
                       courseId, CommentSendingState.PENDING, CommentSendingState.SENDING);
-        
+
         // Wait for the operation to persist
         if (Config.PERSISTENCE_CHECK_DURATION > 0) {
             int elapsedTime = 0;
@@ -50,7 +51,7 @@ public class InstructorStudentCommentClearPendingAction extends Action {
                 taskQueuer.scheduleCommentsNotificationsForCourse(courseId);
             }
         }
-        
+
         if (isError) {
             statusToUser.add(new StatusMessage(Const.StatusMessages.COMMENT_CLEARED_UNSUCCESSFULLY,
                                                StatusMessageColor.DANGER));
@@ -59,11 +60,11 @@ public class InstructorStudentCommentClearPendingAction extends Action {
             statusToUser.add(new StatusMessage(Const.StatusMessages.COMMENT_CLEARED, StatusMessageColor.SUCCESS));
             statusToAdmin = "Successful: " + account.googleId + " cleared pending comments for course " + courseId;
         }
-        
+
         return createRedirectResult(new PageData(account).getInstructorCommentsLink() + "&"
                                     + Const.ParamsNames.COURSE_ID + "=" + courseId);
     }
-    
+
     private int getPendingCommentsSize(String courseId) throws EntityDoesNotExistException {
         return logic.getCommentsForSendingState(courseId, CommentSendingState.PENDING).size()
                 + logic.getFeedbackResponseCommentsForSendingState(courseId, CommentSendingState.PENDING).size();

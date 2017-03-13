@@ -3,13 +3,11 @@ package teammates.test.cases.action;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import teammates.common.datatransfer.DataBundle;
-import teammates.common.datatransfer.InstructorAttributes;
-import teammates.common.datatransfer.StudentAttributes;
-import teammates.common.datatransfer.StudentProfileAttributes;
+import teammates.common.datatransfer.attributes.InstructorAttributes;
+import teammates.common.datatransfer.attributes.StudentAttributes;
+import teammates.common.datatransfer.attributes.StudentProfileAttributes;
 import teammates.common.exception.EntityAlreadyExistsException;
 import teammates.common.exception.EntityDoesNotExistException;
 import teammates.common.exception.InvalidParametersException;
@@ -18,22 +16,20 @@ import teammates.logic.api.Logic;
 import teammates.logic.core.StudentsLogic;
 import teammates.test.driver.AssertHelper;
 import teammates.ui.controller.InstructorStudentRecordsPageAction;
-import teammates.ui.controller.InstructorStudentRecordsPageData;
 import teammates.ui.controller.RedirectResult;
 import teammates.ui.controller.ShowPageResult;
+import teammates.ui.pagedata.InstructorStudentRecordsPageData;
 
 public class InstructorStudentRecordsPageActionTest extends BaseActionTest {
 
-    private final DataBundle dataBundle = getTypicalDataBundle();
     private final Logic logic = new Logic();
 
-    @BeforeClass
-    public void classSetup() {
-        printTestClassHeader();
-        removeAndRestoreTypicalDataBundle();
-        uri = Const.ActionURIs.INSTRUCTOR_STUDENT_RECORDS_PAGE;
+    @Override
+    protected String getActionUri() {
+        return Const.ActionURIs.INSTRUCTOR_STUDENT_RECORDS_PAGE;
     }
 
+    @Override
     @Test
     public void testExecuteAndPostProcess() throws Exception {
         InstructorAttributes instructor = dataBundle.instructors.get("instructor3OfCourse1");
@@ -111,7 +107,7 @@ public class InstructorStudentRecordsPageActionTest extends BaseActionTest {
                                   + "Student Profile: " + expectedProfile.toString()
                                   + "|||/page/instructorStudentRecordsPage";
         AssertHelper.assertLogMessageEquals(expectedLogMessage, a.getLogMessage());
-        
+
         ______TS("Typical case: instructor cannot view sections");
 
         instructor = dataBundle.instructors.get("helperOfCourse1");
@@ -176,8 +172,9 @@ public class InstructorStudentRecordsPageActionTest extends BaseActionTest {
         return student;
     }
 
-    private InstructorStudentRecordsPageAction getAction(String... params) {
-        return (InstructorStudentRecordsPageAction) gaeSimulation.getActionObject(uri, params);
+    @Override
+    protected InstructorStudentRecordsPageAction getAction(String... params) {
+        return (InstructorStudentRecordsPageAction) gaeSimulation.getActionObject(getActionUri(), params);
     }
 
 }

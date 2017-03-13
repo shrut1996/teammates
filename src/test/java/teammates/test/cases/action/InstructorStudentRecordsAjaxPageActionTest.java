@@ -1,27 +1,22 @@
 package teammates.test.cases.action;
 
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import teammates.common.datatransfer.DataBundle;
-import teammates.common.datatransfer.InstructorAttributes;
-import teammates.common.datatransfer.StudentAttributes;
+import teammates.common.datatransfer.attributes.InstructorAttributes;
+import teammates.common.datatransfer.attributes.StudentAttributes;
 import teammates.common.util.Const;
 import teammates.ui.controller.InstructorStudentRecordsAjaxPageAction;
-import teammates.ui.controller.InstructorStudentRecordsAjaxPageData;
 import teammates.ui.controller.ShowPageResult;
+import teammates.ui.pagedata.InstructorStudentRecordsAjaxPageData;
 
 public class InstructorStudentRecordsAjaxPageActionTest extends BaseActionTest {
 
-    private final DataBundle dataBundle = getTypicalDataBundle();
-
-    @BeforeClass
-    public void classSetup() {
-        printTestClassHeader();
-        removeAndRestoreTypicalDataBundle();
-        uri = Const.ActionURIs.INSTRUCTOR_STUDENT_RECORDS_AJAX_PAGE;
+    @Override
+    protected String getActionUri() {
+        return Const.ActionURIs.INSTRUCTOR_STUDENT_RECORDS_AJAX_PAGE;
     }
 
+    @Override
     @Test
     public void testExecuteAndPostProcess() {
         InstructorAttributes instructor = dataBundle.instructors.get("instructor3OfCourse1");
@@ -31,7 +26,7 @@ public class InstructorStudentRecordsAjaxPageActionTest extends BaseActionTest {
         gaeSimulation.loginAsInstructor(instructorId);
 
         ______TS("Typical case: specific session name");
-        
+
         String[] submissionParams = new String[] {
                 Const.ParamsNames.COURSE_ID, instructor.courseId,
                 Const.ParamsNames.STUDENT_EMAIL, student.email,
@@ -45,10 +40,10 @@ public class InstructorStudentRecordsAjaxPageActionTest extends BaseActionTest {
                      r.getDestinationWithParams());
         assertFalse(r.isError);
         assertEquals("", r.getStatusMessage());
-        
+
         InstructorStudentRecordsAjaxPageData data = (InstructorStudentRecordsAjaxPageData) r.data;
         assertEquals(1, data.getResultsTables().size());
-        
+
         ______TS("Typical case: instructor cannot view sections");
 
         instructor = dataBundle.instructors.get("helperOfCourse1");
@@ -70,11 +65,12 @@ public class InstructorStudentRecordsAjaxPageActionTest extends BaseActionTest {
 
         data = (InstructorStudentRecordsAjaxPageData) r.data;
         assertEquals(0, data.getResultsTables().size());
-        
+
     }
 
-    private InstructorStudentRecordsAjaxPageAction getAction(String... params) {
-        return (InstructorStudentRecordsAjaxPageAction) gaeSimulation.getActionObject(uri, params);
+    @Override
+    protected InstructorStudentRecordsAjaxPageAction getAction(String... params) {
+        return (InstructorStudentRecordsAjaxPageAction) gaeSimulation.getActionObject(getActionUri(), params);
     }
 
 }
